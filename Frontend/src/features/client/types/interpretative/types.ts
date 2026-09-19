@@ -1,4 +1,3 @@
-import type { CandidateTeamOptions } from "../shared/types"
 
 export type CreateInterpretativeScoreParams = {
     team_id: number,
@@ -17,7 +16,7 @@ export type GetInterpretativeTeamDTO = {
 
 export type InterpretativeTeam = {
     team_id: string,
-    team: CandidateTeamOptions,
+    team: string,
     created_at: string
 }
 
@@ -25,7 +24,7 @@ export type CreateInterpretativeScoreDTO = {
     status: number,
     message: string,
     has_submitted?: boolean,
-    results?: { team_id: number, score_id: number, total_score: string }[]
+    results?: { subject_id: number, score_id: number, total_score: string }[]
 }
 
 export type MyInterpretativeScoreDTO = {
@@ -40,7 +39,6 @@ export type MyInterpretativeScoreDTO = {
     created_at: string
 }
 
-/** Scores THIS judge has already committed - the server-side "already submitted" source of truth. */
 export type GetMyInterpretativeScoresResponse = {
     status: number,
     message: string,

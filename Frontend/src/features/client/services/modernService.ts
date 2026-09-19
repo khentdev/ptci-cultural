@@ -9,19 +9,17 @@ import type {
 
 export const modernService = {
     getTeams: async () => {
-        const res = await axiosInstance.get("/teams/readTeams.php")
+        const res = await axiosInstance.get("/teams")
         return GetTypedResponse<GetModernTeamDTO>(res)
     },
 
-    /** One all-or-nothing POST; replaces the old per-row fan-out. */
     createModernScoreBatch: async (data: CreateModernScoreParams[]) => {
-        const res = await axiosInstance.post("/category/modern_dance/batchScore.php", data)
+        const res = await axiosInstance.post("/scores/modern/batch", data)
         return GetTypedResponse<CreateModernScoreDTO>(res)
     },
 
-    /** Scores the signed-in judge has already committed for this category. */
     getMyModernScores: async () => {
-        const res = await axiosInstance.get("/category/modern_dance/myScores.php")
+        const res = await axiosInstance.get("/scores/modern/mine")
         return GetTypedResponse<GetMyModernScoresResponse>(res)
     },
 }

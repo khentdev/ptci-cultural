@@ -37,7 +37,7 @@ export const useContestantsStore = defineStore("contestantStore", () => {
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
         select: (data) => ({
             ...data,
-            data: [...data.data].sort((a, b) => a.cand_name.localeCompare(b.cand_name)),
+            data: [...data.data].sort((a, b) => Number(a.cand_number) - Number(b.cand_number)),
         }),
     });
     const refetchContestants = () => getContestants.refetch();

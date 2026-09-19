@@ -44,6 +44,7 @@
       onClick: () => (toggleSettings.value = !toggleSettings.value),
       isOpen: toggleSettings,
       childrens: [
+        { label: "Manage Teams", routeName: "manage-teams" },
         { label: "Manage Contestants", routeName: "manage-contestants" },
         { label: "Manage Judge Accounts", routeName: "manage-judge-accounts" },
         { label: "Manage Admin Accounts", routeName: "manage-admin-accounts" },

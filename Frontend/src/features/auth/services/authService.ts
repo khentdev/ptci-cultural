@@ -5,19 +5,19 @@ import type { LoginResponseDTO, LoginParams, CheckSessionResponseDTO, MarkUserAs
 
 export const authService = {
     loginUser: async ({ username, password }: LoginParams): Promise<LoginResponseDTO> => {
-        const res = await axiosInstance.post("/auth/login.php", { username, password })
+        const res = await axiosInstance.post("/auth/login", { username, password })
         return GetTypedResponse<LoginResponseDTO>(res)
     },
     checkSession: async () => {
-        const res = await axiosInstance.post("/auth/check_session.php", undefined, { timeout: 20000 })
+        const res = await axiosInstance.post("/auth/check-session", undefined, { timeout: 20000 })
         return GetTypedResponse<CheckSessionResponseDTO>(res)
     },
     markUserAsSubmitted: async () => {
-        const res = await axiosInstance.put("/auth/has_submitted.php")
+        const res = await axiosInstance.put("/auth/has-submitted")
         return GetTypedResponse<MarkUserAsSubmittedResponseDTO>(res)
     },
     logoutUser: async () => {
-        const res = await axiosInstance.post("/auth/logout.php")
+        const res = await axiosInstance.post("/auth/logout")
         return GetTypedResponse<LogoutResponse>(res)
     }
 }

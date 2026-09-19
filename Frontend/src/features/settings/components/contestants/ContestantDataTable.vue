@@ -8,9 +8,11 @@
       <table v-else :class="TABLE_STYLES.TB">
         <thead :class="TABLE_STYLES.THEADROW">
           <tr>
-            <th :class="TABLE_STYLES.TH">Time Created</th>
+            <th :class="TABLE_STYLES.TH">No.</th>
             <th :class="TABLE_STYLES.TH">Contestant Name</th>
             <th :class="TABLE_STYLES.TH">Team</th>
+            <th :class="TABLE_STYLES.TH">Gender</th>
+            <th :class="TABLE_STYLES.TH">Time Created</th>
             <th :class="TABLE_STYLES.TH">Actions</th>
           </tr>
         </thead>
@@ -18,13 +20,19 @@
         <tbody :class="TABLE_STYLES.TBODY">
           <tr v-for="c in getContestants.data?.data" :key="`${c.cand_team}-${c.cand_id}`"
             class="hover:bg-gray-50 transition-colors">
-            <td :class="TABLE_STYLES.TD.no_bold">{{ formatDateAndTime(c.created_at) }}</td>
+            <td :class="TABLE_STYLES.TD.bold">{{ c.cand_number }}</td>
             <td :class="TABLE_STYLES.TD.bold">{{ FormatFullName(c.cand_name) }}</td>
             <td :class="TABLE_STYLES.TD.no_bold">
               <span class="px-2 py-1 rounded text-xs font-medium" :class="getTeamBadgeClasses(c.cand_team)">
                 {{ getFormattedTeamLabel(c.cand_team) }}
               </span>
             </td>
+            <td :class="TABLE_STYLES.TD.no_bold">
+              <span class="px-2 py-1 rounded text-xs font-medium" :class="getGenderBadgeClasses(c.cand_gender)">
+                {{ CapitalizeLabel(c.cand_gender) }}
+              </span>
+            </td>
+            <td :class="TABLE_STYLES.TD.no_bold">{{ formatDateAndTime(c.created_at) }}</td>
             <td :class="TABLE_STYLES.TD.no_bold">
               <ActionsDropdown :items="rowActions(c)" />
             </td>
@@ -41,7 +49,7 @@
 
   <DeleteConfirmationModal :datas="dataToDelete" title="Delete Contestant"
     description="Are you sure you want to delete this contestant? Their submitted scores are not removed."
-    number-label="Team" name-label="Contestant" :on-close="() => (showConfirmation = false)" :show="showConfirmation"
+    number-label="Contestant Number" name-label="Contestant" :on-close="() => (showConfirmation = false)" :show="showConfirmation"
     :on-delete="deleteContestant" />
 </template>
 
@@ -59,7 +67,7 @@
   import ActionsDropdown from "../../../shared/components/reusables/ActionsDropdown.vue";
   import ContestantForm from "./ContestantForm.vue";
   import { TABLE_STYLES } from "../../../shared/constants/tableStyles";
-  import { FormatFullName } from "../../../../utils/capitalizeWord";
+  import { CapitalizeLabel, FormatFullName } from "../../../../utils/capitalizeWord";
   import type { ActionsDropdownItem } from "../../../shared/types/actionsDropdown";
 
   const {
@@ -70,6 +78,13 @@
     refetchContestants,
     fetchError,
   } = useContestantsStore();
+
+  const getGenderBadgeClasses = (gender: string) =>
+    ({
+      male: "bg-blue-100 text-blue-800",
+      female: "bg-pink-100 text-pink-800",
+      other: "bg-gray-100 text-gray-700",
+    })[gender.toLowerCase()] ?? "bg-gray-100 text-gray-700";
 
   const formatDateAndTime = (date: string): string => {
     const options: Intl.DateTimeFormatOptions = {
@@ -102,7 +117,14 @@
     {
       label: "Edit contestant",
       icon: SquarePen,
-      onClick: () => toggleForm({ cand_id: c.cand_id, cand_name: c.cand_name, cand_team: c.cand_team }),
+      onClick: () =>
+        toggleForm({
+          cand_id: c.cand_id,
+          cand_number: c.cand_number,
+          cand_name: c.cand_name,
+          team_id: c.team_id,
+          cand_gender: c.cand_gender,
+        }),
     },
     {
       label: "Delete contestant",
@@ -111,7 +133,7 @@
       onClick: () =>
         toggleConfirmationModal({
           id: c.cand_id,
-          number: getFormattedTeamLabel(c.cand_team),
+          number: c.cand_number,
           name: c.cand_name,
         }),
     },
