@@ -16,15 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
-include('functions.php');
+include __DIR__ . '/functions.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'DELETE'){
     $inputData = json_decode(file_get_contents("php://input"), true);
-    
-    error_log(print_r($inputData, true));
-    var_dump($inputData);
     
     if(empty($inputData)){
         $deleteUser = deleteUser($_GET);

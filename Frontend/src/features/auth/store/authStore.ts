@@ -29,7 +29,6 @@ export const useAuthStore = defineStore("auth", () => {
     const clearLoginErrors = () => Object.keys(loginErrors).forEach(key => loginErrors[key as keyof typeof loginErrors] = "")
 
     const userMetaData = ref<UserData | null>(null)
-    const rulesAgreed = ref<boolean>(false)
 
     const setUserMetaData = ({ id, role, username, has_submitted }: UserData) => {
         userMetaData.value = {
@@ -58,19 +57,6 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
 
-    const setRulesAgreed = (agreed: boolean) => {
-        // I'll handle the API endpoint for agreement here
-        // 
-        rulesAgreed.value = agreed
-        localStorage.setItem('rulesAgreed', agreed.toString())
-    }
-
-    const initializeRulesAgreement = () => {
-        const stored = localStorage.getItem('rulesAgreed')
-        if (stored !== null) {
-            rulesAgreed.value = stored === 'true'
-        }
-    }
 
     const capitalizedUsername = computed(() => {
         if (getUserMetaData.value)
@@ -85,14 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
     const clearSession = () => {
         userMetaData.value = null
         setLogin.value = null
-        rulesAgreed.value = false
-        localStorage.removeItem('rulesAgreed')
-        localStorage.removeItem('modern-submissions')
-        localStorage.removeItem('vocal-submissions')
-        localStorage.removeItem('interpretative-submissions')
-        localStorage.removeItem("interpretative-scores")
-        localStorage.removeItem("modern-dance-scores")
-        localStorage.removeItem("vocal-scores")
+        loadingState.sessionInitialized = false
     }
     const getUserMetaData = computed(() => userMetaData.value)
 
@@ -122,6 +101,10 @@ export const useAuthStore = defineStore("auth", () => {
             }
             if (error.response?.data.status === 401 || error.response?.data.status === 422) {
                 loginErrors.invalidCredentials = "Invalid username or password."
+            }
+            if (error.response?.status === 429) {
+                loginErrors.general = error.response.data?.message
+                    || "Too many login attempts. Please wait a few minutes and try again."
             }
 
             return { success: false }
@@ -186,15 +169,17 @@ export const useAuthStore = defineStore("auth", () => {
         }
     }
 
-    const logout = async () => {
+    const logoutUser = async () => {
         if (loadingState.isLoggingOut) return;
         loadingState.isLoggingOut = true
 
         try {
             await authService.logoutUser()
+        } catch {
+            // Cookie may already be gone - clear the local session regardless.
         } finally {
-            loadingState.isLoggingOut = false
             clearSession();
+            loadingState.isLoggingOut = false
         }
     }
 
@@ -208,9 +193,6 @@ export const useAuthStore = defineStore("auth", () => {
         capitalizedRole: readonly(capitalizedRole),
         refreshSession,
         isLoggedIn,
-        rulesAgreed: readonly(rulesAgreed),
-        setRulesAgreed,
-        initializeRulesAgreement,
-        setUserHasSubmitted, setUserMetaDataAfterScoreSubmit, logout
+        setUserHasSubmitted, setUserMetaDataAfterScoreSubmit, logoutUser
     }
 })

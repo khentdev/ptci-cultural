@@ -1,6 +1,6 @@
 
 
-// URL: http://localhost/pageant-tabulation/api/auth/login.php
+// Backend: Backend/api/auth/*.php (PHP + mysqli, file-routed)
 
 export type MarkUserAsSubmittedResponseDTO = {
     status: string,

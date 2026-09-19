@@ -1,84 +1,33 @@
 <?php
-$ports = array("http://localhost:5173", "http://localhost:4173", "https://cultural-night.vercel.app/");
+require_once __DIR__ . '/../../../config/session_config.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../config/guards.php';
 
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
-    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+require_method('GET');
+
+// These tables key on team_id and join `teams`; the previous version was a
+// copy of the pageant endpoint and joined a `contestants` table that does not exist.
+$query = "SELECT
+            fs.team_id,
+            t.team,
+            fs.final_score,
+            fs.created_at,
+            fs.updated_at
+          FROM modern_final_score fs
+          INNER JOIN teams t ON fs.team_id = t.team_id
+          ORDER BY fs.final_score DESC";
+
+$result = mysqli_query($conn, $query);
+
+if (!$result) {
+    json_out(500, ['message' => 'Internal Server Error']);
 }
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
-header("Access-Control-Allow-Credentials: true");
 
-// options
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+if (mysqli_num_rows($result) === 0) {
+    json_out(404, ['message' => 'No Modern Dance Final Scores Found']);
 }
 
-include('../../../config/session_config.php');
-include('functions.php');
-
-$requestMethod = $_SERVER["REQUEST_METHOD"];
-
-if($requestMethod == 'GET'){
-    $params = $_GET;
-
-    $whereClause = "";
-    if (isset($params['gender']) && !empty(trim($params['gender']))) {
-        $gender = mysqli_real_escape_string($conn, $params['gender']);
-        $whereClause = "WHERE c.cand_gender = '$gender'";
-    }
-
-    $query = "SELECT
-                fs.cand_id,
-                c.cand_number,
-                c.cand_name,
-                c.cand_team,
-                c.cand_gender,
-                fs.final_score,
-                fs.created_at,
-                fs.updated_at
-              FROM modern_final_score fs
-              INNER JOIN contestants c ON fs.cand_id = c.cand_id
-              $whereClause
-              ORDER BY fs.final_score DESC";
-
-    $result = mysqli_query($conn, $query);
-
-    if($result){
-        if(mysqli_num_rows($result) > 0){
-            $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-            $data = [
-                'status' => 200,
-                'message' => 'Modern Final Scores Fetched Successfully',
-                'data' => $res
-            ];
-            header("HTTP/1.0 200 OK");
-            echo json_encode($data);
-        }else{
-            $data = [
-                'status' => 404,
-                'message' => 'No Modern Final Scores Found',
-            ];
-            header("HTTP/1.0 404 Not Found");
-            echo json_encode($data);
-        }
-    }else{
-        $data = [
-            'status' => 500,
-            'message' => 'Internal Server Error',
-        ];
-        header("HTTP/1.0 500 Internal Server Error");
-        echo json_encode($data);
-    }
-
-}else {
-    $data = [
-        'status' => 405,
-        'message' => $requestMethod. ' Method Not Allowed',
-    ];
-    header("HTTP/1.0 405 Method Not Allowed");
-    echo json_encode($data);
-}
-?>
+json_out(200, [
+    'message' => 'Modern Dance Final Scores Fetched Successfully',
+    'data' => mysqli_fetch_all($result, MYSQLI_ASSOC),
+]);

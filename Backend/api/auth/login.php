@@ -1,6 +1,6 @@
 <?php
-require_once '../../config/session_config.php';
-require_once '../../config/database.php';
+require_once __DIR__ . '/../../config/session_config.php';
+require_once __DIR__ . '/../../config/database.php';
 
 
 if(!isset($conn) || !$conn){
@@ -18,13 +18,19 @@ if (empty($input['username']) || empty($input['password'])) {
 }
 
 $username = mysqli_real_escape_string($conn, $input['username']);
-$query = "SELECT id, username, password, role, has_agreed, has_submitted FROM users WHERE username = '$username'";
+$query = "SELECT id, username, password, role, has_agreed, has_submitted, is_active FROM users WHERE username = '$username'";
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) === 1) {
     $user = mysqli_fetch_assoc($result);
 
     if (password_verify($input['password'], $user['password'])) {
+        if (isset($user['is_active']) && (int)$user['is_active'] === 0) {
+            http_response_code(403);
+            echo json_encode(['status' => 403, 'message' => 'This account has been deactivated.']);
+            exit();
+        }
+
         // Store user data in session
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];

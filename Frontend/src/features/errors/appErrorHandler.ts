@@ -22,6 +22,7 @@ export const appErrorHandler = (err: AxiosError): ErrorReturns => {
         return { type: "serverError", message: InfraErrorMessages.serverError, retryable: true, logout: false, err }
 
 
-    const message = "Something went wrong. Please try again."
+    const message = (err.response?.data as { message?: string } | undefined)?.message
+        ?? "Something went wrong. Please try again."
     return { type: "unknownError", message, retryable: false, logout: false, err }
 }

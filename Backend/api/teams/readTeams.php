@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
-include('functions.php');
+include __DIR__ . '/functions.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 

@@ -1,136 +1,118 @@
 import { defineStore } from "pinia";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { interpretativeService } from "../services/interpretativeService";
-import { ref, toRaw, watchEffect } from "vue";
-import { useToast } from "../../shared/composables/useToast";
-import type { CreateInterpretativeScoreParams, InterpretativeScoreErrorResponse } from "../types/interpretative/types";
-import type { AxiosError } from "axios";
-import { appErrorHandler } from "../../errors/appErrorHandler";
-import { useLoadingStore } from "../../../shared/store/useLoadingState";
-import { useGlobalErrorSetter } from "../../../shared/store/useGlobalErrorState";
+import { reactive, readonly, ref, toRaw, watchEffect } from "vue";
 import { useLocalStorage } from "@vueuse/core";
-import type { CandidateTeamOptions } from "../types/talent/types";
+import type { AxiosError } from "axios";
+
+import { interpretativeService } from "../services/interpretativeService";
+import { appErrorHandler } from "../../errors/appErrorHandler";
+import { useToast } from "../../shared/composables/useToast";
+import { useAuthStore } from "../../auth/store/authStore";
+import type { CreateInterpretativeScoreParams, InterpretativeScoreErrorResponse } from "../types/interpretative/types";
+
+const INFRA_ERRORS = ["offline", "unreachable", "serverError", "requestTimeout"];
 
 export const useInterpretativeStore = defineStore("interpretativeScore", () => {
-    const { toast } = useToast()
+    const { toast } = useToast();
+    const authStore = useAuthStore();
 
-    const { setLoading } = useLoadingStore()
-    const { setError } = useGlobalErrorSetter()
+    const scoreInputs = useLocalStorage<Record<string, unknown>[]>("interpretative-scores", []);
 
-    type ScoreFields = {
-        team_id: number,
-        team: Capitalize<CandidateTeamOptions>
-        originality: number,
-        mastery_of_steps: number,
-        choreography_and_style: number,
-        costume_and_props: number,
-        stage_presence: number
-    }[]
-    const submissions = useLocalStorage<Record<string, { submitted: boolean }>>(
-        "interpretative-submissions",
-        {}
-    );
+    const enabled = ref(false);
 
-    const setSubmitted = (val: boolean, key: string) => {
-        submissions.value[key] = { submitted: val };
-    };
-
-    const isSubmitted = (key: string) => {
-        return submissions.value[key]?.submitted ?? false;
-    };
-    const interpretativeTeamsScoreInput = useLocalStorage<ScoreFields[]>("interpretative-scores", []);
-
-    const interpretativeEnabled = ref(false)
     const getInterpretativeTeams = useQuery({
-        queryKey: ["interpretativeTeams"],
+        queryKey: ["interpretativeSubjects"],
         queryFn: () => interpretativeService.getTeams(),
         staleTime: 15 * 60 * 1000,
         gcTime: 60 * 60 * 1000,
         retry: 3,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
         select: (data) => data.data,
-        enabled: interpretativeEnabled
+        enabled,
     });
-    const refetchInterpretativeTeamsFeat = () => getInterpretativeTeams.refetch()
+
+    /**
+     * The server is the source of truth for "already submitted" - a page refresh,
+     * a cleared browser store or a different device all still lock the inputs.
+     */
+    const getMyInterpretativeScores = useQuery({
+        queryKey: ["myInterpretativeScores"],
+        queryFn: () => interpretativeService.getMyInterpretativeScores(),
+        staleTime: 15 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+        select: (data) => data.data,
+        enabled,
+    });
+
+    const refetchInterpretativeFeat = () => {
+        getInterpretativeTeams.refetch();
+        getMyInterpretativeScores.refetch();
+    };
 
     const createInterpretativeScoreMutation = useMutation({
-        mutationFn: async (data: CreateInterpretativeScoreParams[]) => {
-            const results = await Promise.allSettled(data.map(d =>
-                interpretativeService.createInterpretativeScore(
-                    {
-                        team_id: d.team_id,
-                        originality: d.originality,
-                        mastery_of_steps: d.mastery_of_steps,
-                        choreography_and_style: d.choreography_and_style,
-                        costume_and_props: d.costume_and_props,
-                        stage_presence: d.stage_presence
-                    })
-            ))
-            const failures = results.filter(d => d.status === "rejected")
-            if (failures.length > 0) throw (failures[0] as PromiseRejectedResult).reason
-            return results.filter(d => d.status === "fulfilled").map(v => v.value)
+        mutationFn: (scores: CreateInterpretativeScoreParams[]) => interpretativeService.createInterpretativeScoreBatch(scores),
+        onMutate: () => ({ backupScores: structuredClone(toRaw(scoreInputs.value)) }),
+        onSuccess: (res) => {
+            if (typeof res.has_submitted === "boolean") {
+                authStore.setUserMetaDataAfterScoreSubmit(res.has_submitted);
+            }
+            getMyInterpretativeScores.refetch().catch(() => {});
+            toast.success("All scores submitted successfully!");
         },
-        onMutate: () => {
-            const backupScores = structuredClone(toRaw(interpretativeTeamsScoreInput.value))
-            return { backupScores }
-        },
-        onSuccess: () => {
-            setSubmitted(true, "interpretative-submitted")
-            toast.success("All scores submitted successfully!")
-        },
-        onError: (err: AxiosError<InterpretativeScoreErrorResponse>, _, context) => {
-            const parsed = appErrorHandler(err)
-            const infraMaps = ["offline", "unreachable", "serverError", "requestTimeout"]
-            console.error(parsed.err)
-            if (infraMaps.includes(parsed.type)) toast.error(parsed.message);
+        onError: (err: AxiosError<InterpretativeScoreErrorResponse>, _vars, context) => {
+            const parsed = appErrorHandler(err);
+            if (INFRA_ERRORS.includes(parsed.type)) toast.error(parsed.message);
+            if (parsed.err.status === 422 || parsed.err.status === 409) {
+                toast.error("You have already submitted your scores for this category.");
+                getMyInterpretativeScores.refetch().catch(() => {});
+                return;
+            }
             if (context?.backupScores) {
-                interpretativeTeamsScoreInput.value = structuredClone(context.backupScores);
-                toast.info("Interpretative scores have been restored. Please try again.");
+                scoreInputs.value = structuredClone(context.backupScores);
+                toast.info("Interpretative dance scores have been restored. Please try again.");
             }
-        }
-    })
-    const createInterpretativeScore = (data: CreateInterpretativeScoreParams[]) => {
-        if (isSubmitted("interpretative-submitted")) {
-            toast.info("You’ve already submitted scores for these teams.");
-            return
-        }
-        return createInterpretativeScoreMutation.mutateAsync(data)
-    }
+        },
+    });
+
+    const createInterpretativeScore = (data: CreateInterpretativeScoreParams[]) =>
+        createInterpretativeScoreMutation.mutateAsync(data);
+
+    /** Ids this judge has already scored, as strings, for per-row disabling. */
+    const scoredInterpretativeIds = () =>
+        new Set((getMyInterpretativeScores.data.value ?? []).map((s) => String(s.team_id)));
+
+    const fetchError = reactive({ serverError: false, offline: false });
 
     watchEffect(() => {
-        setLoading("interpretativeTeams", "initialFetching", getInterpretativeTeams.isPending.value || getInterpretativeTeams.isLoading.value)
-        setLoading("interpretativeTeams", "fetchRefresh", getInterpretativeTeams.isFetching.value)
+        const subjectsFailed = getInterpretativeTeams.isError.value;
+        const myScoresFailed = getMyInterpretativeScores.isError.value;
 
-        setLoading("interpretativeTeams", "createInterpretativeScore", createInterpretativeScoreMutation.isPending.value)
-
-
-        if (getInterpretativeTeams.data.value) {
-            setError("interpretativeTeams", "fetchOffline", false)
-            setError("interpretativeTeams", "fetchServerError", false)
-        }
-    })
-
-    watchEffect(() => {
-
-        if (getInterpretativeTeams.isError.value) {
-            const interpretativeErr = getInterpretativeTeams.error.value as AxiosError<InterpretativeScoreErrorResponse>
-            if (interpretativeErr) {
-                const { type, } = appErrorHandler(interpretativeErr)
-                if (type === "offline") { setError("interpretativeTeams", "fetchOffline", true) }
-                if (type === "serverError" || type === "unreachable" || type === "requestTimeout") {
-                    setError("interpretativeTeams", "fetchServerError", true)
-                }
+        if (subjectsFailed || myScoresFailed) {
+            const error = (subjectsFailed
+                ? getInterpretativeTeams.error.value
+                : getMyInterpretativeScores.error.value) as AxiosError<InterpretativeScoreErrorResponse>;
+            if (error) {
+                const { type } = appErrorHandler(error);
+                fetchError.offline = type === "offline";
+                fetchError.serverError =
+                    type === "serverError" || type === "unreachable" || type === "requestTimeout";
             }
+        } else if (getInterpretativeTeams.isSuccess.value && getMyInterpretativeScores.isSuccess.value) {
+            fetchError.offline = false;
+            fetchError.serverError = false;
         }
-    })
+    });
 
     return {
         getInterpretativeTeams,
-        refetchInterpretativeTeamsFeat,
+        getMyInterpretativeScores,
+        scoredInterpretativeIds,
+        refetchInterpretativeFeat,
         createInterpretativeScore,
-        submissions,
-        enableInterpretative: () => interpretativeEnabled.value = true,
-        setSubmitted,
-        isSubmitted,
-    }
-})
+        createInterpretativeScoreMutation,
+        fetchError: readonly(fetchError),
+        enableInterpretative: () => (enabled.value = true),
+    };
+});
