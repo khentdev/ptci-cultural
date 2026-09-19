@@ -14,7 +14,7 @@ export type ScoreboardCategory = {
     criteria: Criterion[]
 }
 
-/** One judge's score row, as returned by getJudgeScore.php (already grouped by judge). */
+/** One judge's score row from GET /api/scores/:category/judges (already grouped by judge). */
 export type JudgeScoreRow = {
     score_id: string
     judge_id: string

@@ -1,6 +1,6 @@
 
 
-// Backend: Backend/api/auth/*.php (PHP + mysqli, file-routed)
+// Backend: Backend-Node (Fastify) - POST /api/auth/login
 
 export type MarkUserAsSubmittedResponseDTO = {
     status: string,
