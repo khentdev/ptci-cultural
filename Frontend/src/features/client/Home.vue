@@ -15,75 +15,7 @@
           evaluation.
         </p>
       </header>
-      <div v-if="!authStore.rulesAgreed" class="space-y-8">
-        <div class="text-center space-y-4">
-          <div class="relative">
-            <h2
-              class="bg-clip-text h-16  bg-gradient-to-r from-text-primary text-transparent from-20% to-primary text-2xl sm:text-4xl font-bold font-lora relative z-10 drop-shadow-sm">
-              Judging Rules Agreement
-            </h2>
-          </div>
-          <p
-            class="text-text-primary/80 text-base sm:text-lg font-poppins max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
-            Please carefully read and agree to the following rules before
-            proceeding to the judging phase. Your understanding and compliance
-            with these guidelines ensures fair and consistent evaluation.
-          </p>
-        </div>
-        <div
-          class="backdrop-blur-md bg-white/30 rounded-2xl md:p-8 p-4 border border-white/40 shadow-xl shadow-black/5">
-          <div class="flex items-center gap-3 mb-6 shrink-0">
-            <div
-              class="size-8 bg-text-primary/10 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/30">
-              <Menu class="stroke-text-primary size-4 stroke-3" />
-            </div>
-            <h3 class="text-lg md:text-xl font-bold text-text-primary font-lora drop-shadow-sm">
-              General Judging Rules
-            </h3>
-          </div>
-          <div
-            class="space-y-4 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
-            <text-card :rules="judgingRules" />
-          </div>
-          <div class="mt-8 pt-6 border-t border-white/20 shrink-0">
-            <button @click="openTopSix"
-              class="group bg-white/15 hover:bg-white/30 backdrop-blur-sm border border-white/30 hover:border-white/40 shrink-0 text-text-primary px-3 md:px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-black/10 flex items-center gap-3">
-              <Menu class="stroke-text-primary size-4 stroke-3 shrink-0" />
-              <span class="text-nowrap">View Top 7 Rules</span>
-              <chevron-right
-                class="stroke-text-primary w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 shrink-0" />
-            </button>
-          </div>
-        </div>
-        <div class="backdrop-blur-md bg-white/20 rounded-2xl p-8 border border-white/40 shadow-lg shadow-black/5">
-          <div class="space-y-6">
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 mt-1">
-                <input id="rules-agreement" v-model="rulesAgreed" type="checkbox"
-                  class="h-5 w-5 text-primary border-white/40 rounded focus:ring-primary focus:ring-2 transition-colors duration-200 backdrop-blur-sm" />
-              </div>
-              <label for="rules-agreement"
-                class="text-text-primary/90 leading-relaxed font-poppins text-sm sm:text-base drop-shadow-sm">
-                I have read and understood all the judging rules and guidelines.
-                I agree to follow them throughout the judging process and
-                understand that my scores will be final once submitted. I
-                acknowledge that this agreement is binding and represents my
-                commitment to fair and impartial evaluation.
-              </label>
-            </div>
-            <div class="flex justify-center pt-4 shrink-0">
-              <button @click="proceedToJudging" :disabled="!rulesAgreed"
-                class="group bg-gradient-to-r from-primary to-primary/95 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white px-5 md:px-10 py-4 rounded-xl font-semibold font-poppins transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-primary/30 disabled:hover:scale-100 disabled:hover:shadow-none focus:outline-none focus:ring-4 focus:ring-primary/20 border border-white/20">
-                <span class="flex items-center gap-3 md:text-sm text-xs">
-                  <circle-check v-if="rulesAgreed" class="hidden md:block sm:size-5 shrink-0" />
-                  I Agree - Proceed to Judging
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="space-y-8 flex flex-col h-full">
+      <div class="space-y-8 flex flex-col h-full">
         <div class="text-center space-y-6 h-full flex flex-col justify-center items-center">
           <h2 class="text-text-primary text-2xl sm:text-3xl font-bold font-lora relative z-10 drop-shadow-sm">
             Ready to Begin Judging
@@ -166,46 +98,6 @@
             <div class="space-y-4">
               <text-card :rules="judgingRules" />
             </div>
-            <div class="backdrop-blur-md bg-white/20 rounded-2xl p-6 border border-white/40 shadow-md shadow-black/5">
-              <div class="space-y-4">
-                <div class="flex items-start space-x-4">
-                  <div class="flex-shrink-0 mt-1">
-                    <input id="modal-rules-agreement" v-model="rulesAgreed" type="checkbox"
-                      :disabled="authStore.rulesAgreed"
-                      class="h-5 w-5 text-primary border-white/40 rounded focus:ring-primary focus:ring-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm" />
-                  </div>
-                  <label for="modal-rules-agreement"
-                    class="text-text-primary/90 leading-relaxed font-poppins text-sm sm:text-base drop-shadow-sm"
-                    :class="{ 'opacity-50': authStore.rulesAgreed }">
-                    I have read and understood all the judging rules and
-                    guidelines. I agree to follow them throughout the judging
-                    process and understand that my scores will be final once
-                    submitted. I acknowledge that this agreement is binding and
-                    represents my commitment to fair and impartial evaluation.
-                  </label>
-                </div>
-                <div class="flex justify-center pt-2">
-                  <button @click="proceedToJudging" :disabled="!rulesAgreed || authStore.rulesAgreed"
-                    class="group bg-gradient-to-r from-primary to-primary/95 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold font-poppins transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 hover:shadow-xl hover:shadow-primary/30 disabled:hover:shadow-none focus:outline-none focus:ring-4 focus:ring-primary/20 border border-white/20">
-                    <span class="flex items-center gap-3">
-                      <svg v-if="!authStore.rulesAgreed"
-                        class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="currentColor"
-                        viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clip-rule="evenodd" />
-                      </svg>
-                      <circle-check class="size-5" v-if="authStore.rulesAgreed" />
-                      {{
-                        authStore.rulesAgreed
-                          ? "Already Agreed"
-                          : "I Agree - Proceed to Judging"
-                      }}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
         <div class="p-6 border-t border-white/40 backdrop-blur-sm bg-white/30">
@@ -222,9 +114,9 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted } from "vue";
+  import { ref } from "vue";
   import TextCard from "./components/reusables/TextCard.vue";
-  import { ChevronRight, Menu, CircleCheck } from "lucide-vue-next";
+  import { ChevronRight, Menu } from "lucide-vue-next";
   import TopSevenRules from "./components/reusables/TopSevenRules.vue";
   import { useAuthStore } from "../auth/store/authStore";
   import { CapitalizeLabel } from "../../utils/capitalizeWord";
@@ -259,7 +151,6 @@
 
   const isTopSixOpen = ref(false);
   const isGeneralRulesOpen = ref(false);
-  const rulesAgreed = ref(false);
 
   const openTopSix = () => (isTopSixOpen.value = true);
   const closeTopSix = () => (isTopSixOpen.value = false);
@@ -267,29 +158,10 @@
   const openGeneralRules = () => (isGeneralRulesOpen.value = true);
   const closeGeneralRules = () => (isGeneralRulesOpen.value = false);
 
-  const proceedToJudging = () => {
-    if (rulesAgreed.value) {
-      authStore.setRulesAgreed(true);
-      if (isGeneralRulesOpen.value) {
-        closeGeneralRules();
-      }
-    }
-  };
 
   const capitalizedName = (val: string | undefined) =>
     val ? CapitalizeLabel(val) : "- Unknown User -";
 
-  onMounted(() => {
-    const stored = localStorage.getItem("rulesAgreed");
-    if (stored) {
-      try {
-        rulesAgreed.value = JSON.parse(stored);
-      } catch {
-        console.warn("Failed to parse rulesAgreed");
-      }
-    }
-    authStore.initializeRulesAgreement();
-  });
 </script>
 
 <style scoped>

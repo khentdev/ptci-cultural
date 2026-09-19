@@ -97,7 +97,7 @@
 
   const handleLogout = async () => {
     try {
-      await authStore.logout()
+      await authStore.logoutUser()
     } catch (err) {
       console.warn("Logout error: ",err)
     } finally {

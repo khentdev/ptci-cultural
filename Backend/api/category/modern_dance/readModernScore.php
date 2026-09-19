@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
-include('functions.php');
+include __DIR__ . '/functions.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
@@ -26,9 +26,9 @@ if($requestMethod == 'GET'){
     if(isset($_GET['score_id'])){
         // Get specific score by ID
         $modernScore = getModernScores($_GET);
-    }elseif(isset($_GET['cand_id'])){
+    }elseif(isset($_GET['team_id'])){
         // Get score by candidate ID
-        $modernScore = getModernScoreByCandId($_GET);
+        $modernScore = getModernScoreByTeamId($_GET);
     }else{
         // Get all scores
         $modernScore = getAllModernScores();

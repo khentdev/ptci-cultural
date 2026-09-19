@@ -1,5 +1,5 @@
 <?php
-require '../../config/database.php';
+require __DIR__ . '/../../config/database.php';
 
 // def
 function error422($message){
@@ -17,9 +17,10 @@ function error422($message){
 function storeUsers($userInput){
     global $conn;
 
-    $username = mysqli_real_escape_string($conn, $userInput['username']);
-    $password = mysqli_real_escape_string($conn, $userInput['password']);
-    $role = mysqli_real_escape_string($conn, $userInput['role']);
+    $username = mysqli_real_escape_string($conn, $userInput['username'] ?? '');
+    // NOT escaped: the raw password is what gets hashed, and what login verifies against.
+    $password = (string)($userInput['password'] ?? '');
+    $role = mysqli_real_escape_string($conn, $userInput['role'] ?? '');
 
     // Validation
     if(empty(trim($username))){
@@ -28,6 +29,8 @@ function storeUsers($userInput){
         return error422('Enter your password');
     }elseif(empty(trim($role))){
         return error422('Enter your role');
+    }elseif(!in_array($role, ['judge', 'admin'], true)){
+        return error422('Role must be either judge or admin');
     }else {
         do {
             $id = rand(100000, 999999);
@@ -64,7 +67,13 @@ function storeUsers($userInput){
 function getUsersList() {
     global $conn;
 
-    $query = "SELECT * FROM users";
+    $roleFilter = '';
+    if (isset($_GET['role']) && in_array($_GET['role'], ['judge', 'admin'], true)) {
+        $roleFilter = "WHERE role = '" . mysqli_real_escape_string($conn, $_GET['role']) . "'";
+    }
+
+    $query = "SELECT id, username, role, has_submitted, has_agreed, is_active, created_at
+              FROM users $roleFilter ORDER BY created_at DESC";
     $query_run = mysqli_query($conn, $query);
 
     if($query_run){

@@ -60,18 +60,27 @@
 <script lang="ts" setup>
 import { Home, ArrowLeft } from "lucide-vue-next";
 import { useRouter } from "vue-router";
+  import { useAuthStore } from "../../features/auth/store/authStore";
 
 const router = useRouter();
+  const authStore = useAuthStore();
+
+  const homeRoute = () => {
+    const role = authStore.getUserMetaData?.role;
+    if (role === "admin") return { name: "dashboard-overview" };
+    if (role === "judge") return { name: "judge-home" };
+    return { name: "login" };
+  };
 
 const goHome = () => {
-  router.push({ name: "home-default" });
+  router.push(homeRoute());
 };
 
 const goBack = () => {
   if (window.history.length > 1) {
     router.go(-1);
   } else {
-    router.push({ name: "home-default" });
+    router.push(homeRoute());
   }
 };
 </script>

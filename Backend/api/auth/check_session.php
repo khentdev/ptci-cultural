@@ -1,5 +1,5 @@
 <?php
-require_once "../../config/session_config.php"; 
+require_once __DIR__ . '/../../config/session_config.php'; 
 
 try {
     if (session_status() !== PHP_SESSION_ACTIVE) {

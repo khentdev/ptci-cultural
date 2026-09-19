@@ -1,5 +1,5 @@
 <?php
-require '../../../config/database.php';
+require __DIR__ . '/../../../config/database.php';
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -24,22 +24,22 @@ function storeModernScore($scoreInput){
         return error422('User not logged in');
     }
 
-    if (!isset($scoreInput['team_id']) || empty(trim($scoreInput['team_id']))) {
+    if (!isset($scoreInput['team_id']) || trim((string)$scoreInput['team_id']) === '') {
         return error422('Enter team ID');
     }
-    if (!isset($scoreInput['mastery_of_steps']) || empty(trim($scoreInput['mastery_of_steps']))) {
+    if (!isset($scoreInput['mastery_of_steps']) || trim((string)$scoreInput['mastery_of_steps']) === '') {
         return error422('Enter mastery of steps score');
     }
-    if (!isset($scoreInput['choreography_and_style']) || empty(trim($scoreInput['choreography_and_style']))) {
+    if (!isset($scoreInput['choreography_and_style']) || trim((string)$scoreInput['choreography_and_style']) === '') {
         return error422('Enter choreography and style score');
     }
-    if (!isset($scoreInput['costume_and_props']) || empty(trim($scoreInput['costume_and_props']))) {
+    if (!isset($scoreInput['costume_and_props']) || trim((string)$scoreInput['costume_and_props']) === '') {
         return error422('Enter costume and props score');
     }
-    if (!isset($scoreInput['stage_presence']) || empty(trim($scoreInput['stage_presence']))) {
+    if (!isset($scoreInput['stage_presence']) || trim((string)$scoreInput['stage_presence']) === '') {
         return error422('Enter stage presence score');
     }
-    if (!isset($scoreInput['audience_impact']) || empty(trim($scoreInput['audience_impact']))) {
+    if (!isset($scoreInput['audience_impact']) || trim((string)$scoreInput['audience_impact']) === '') {
         return error422('Enter audience impact score');
     }
 
@@ -59,8 +59,8 @@ function storeModernScore($scoreInput){
         $checkResult = mysqli_query($conn, $checkQuery);
     } while (mysqli_num_rows($checkResult) > 0);
 
-    $query = "INSERT INTO modern_score (score_id, team_id, judge_id, mastery_of_steps, choreography_and_style, costume_and_props, stage_presence, audience_impact, total_score)
-              VALUES ('$score_id', '$team_id', '$judge_id', '$mastery_of_steps', '$choreography_and_style', '$costume_and_props', '$stage_presence', '$audience_impact', '$total_score')";
+    $query = "INSERT INTO modern_score (score_id, team_id, judge_id, mastery_of_steps, choreography_and_style, costume_and_props, stage_presence, audience_impact)
+              VALUES ('$score_id', '$team_id', '$judge_id', '$mastery_of_steps', '$choreography_and_style', '$costume_and_props', '$stage_presence', '$audience_impact')";
     $result = mysqli_query($conn, $query);
 
     if($result){

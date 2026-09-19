@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include('../../config/session_config.php');
+include __DIR__ . '/../../config/session_config.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 

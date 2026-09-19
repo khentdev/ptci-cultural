@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
-include('functions.php');
+include __DIR__ . '/functions.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
@@ -26,9 +26,9 @@ if($requestMethod == 'GET'){
     if(isset($_GET['score_id'])){
         // Get specific score by ID
         $interpretativeScore = getInterpretativeScores($_GET);
-    }elseif(isset($_GET['cand_id'])){
+    }elseif(isset($_GET['team_id'])){
         // Get score by candidate ID
-        $interpretativeScore = getInterpretativeScoreByCandId($_GET);
+        $interpretativeScore = getInterpretativeScoreByTeamId($_GET);
     }else{
         // Get all scores
         $interpretativeScore = getAllInterpretativeScores();

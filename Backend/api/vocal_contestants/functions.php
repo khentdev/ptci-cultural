@@ -1,5 +1,5 @@
 <?php
-require '../../config/database.php';
+require __DIR__ . '/../../config/database.php';
 
 // def
 function error422($message){
@@ -18,11 +18,11 @@ function storeContestant($contestantInput) {
     global $conn;
 
     $cand_name = mysqli_real_escape_string($conn, $contestantInput['cand_name']);
-    $cand_team = mysqli_real_escape_string($conn, $contestantInput['cand_team']);
+    $cand_team = strtolower(mysqli_real_escape_string($conn, $contestantInput['cand_team']));
 
     // Validate team color
     $validTeams = ['red', 'yellow', 'green', 'purple', 'blue'];
-    if(!in_array($cand_team, $validTeams)){
+    if(!in_array(strtolower($cand_team), $validTeams)){
         $data = [
             'status' => 400,
             'message' => 'Invalid team color. Must be: red, yellow, green, purple, or blue',
@@ -104,7 +104,7 @@ function updateContestant($contestantInput){
 
     $cand_id = mysqli_real_escape_string($conn, $contestantInput['cand_id']);
     $cand_name = mysqli_real_escape_string($conn, $contestantInput['cand_name']);
-    $cand_team = mysqli_real_escape_string($conn, $contestantInput['cand_team']);
+    $cand_team = strtolower(mysqli_real_escape_string($conn, $contestantInput['cand_team']));
 
     // Validation
     if(empty(trim($cand_id))){

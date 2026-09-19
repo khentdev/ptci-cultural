@@ -14,12 +14,12 @@
       await authStore.refreshSession();
     } finally {
       if (!authStore.isLoggedIn) {
-        router.push({ name: "login" });
+        await router.push({ name: "login" });
         return
       }
 
-      if (authStore.getUserMetaData?.role === "admin") router.push({ name: "dashboard-overview" });
-      else router.push({ name: "judge-home" })
+      if (authStore.getUserMetaData?.role === "admin") await router.push({ name: "dashboard-overview" });
+      else await router.push({ name: "judge-home" })
     }
   });
 </script>

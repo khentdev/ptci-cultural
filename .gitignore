@@ -4,3 +4,6 @@ dist/
 .env.*
 *.log
 .DS_Store
+
+# local reference copy, not part of the build
+ptci_tabulation/

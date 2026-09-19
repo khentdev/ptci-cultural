@@ -1,5 +1,5 @@
 <?php
-require '../../../config/database.php';
+require __DIR__ . '/../../../config/database.php';
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -24,25 +24,25 @@ function storeVocalScore($scoreInput){
         return error422('User not logged in');
     }
 
-    if (!isset($scoreInput['cand_id']) || empty(trim($scoreInput['cand_id']))) {
+    if (!isset($scoreInput['cand_id']) || trim((string)$scoreInput['cand_id']) === '') {
         return error422('Enter candidate ID');
     }
-    if (!isset($scoreInput['voice_tone_quality']) || empty(trim($scoreInput['voice_tone_quality']))) {
+    if (!isset($scoreInput['voice_tone_quality']) || trim((string)$scoreInput['voice_tone_quality']) === '') {
         return error422('Enter voice/tone quality score');
     }
-    if (!isset($scoreInput['mastery_and_timing']) || empty(trim($scoreInput['mastery_and_timing']))) {
+    if (!isset($scoreInput['mastery_and_timing']) || trim((string)$scoreInput['mastery_and_timing']) === '') {
         return error422('Enter mastery and timing score');
     }
-    if (!isset($scoreInput['vocal_expression']) || empty(trim($scoreInput['vocal_expression']))) {
+    if (!isset($scoreInput['vocal_expression']) || trim((string)$scoreInput['vocal_expression']) === '') {
         return error422('Enter vocal expression score');
     }
-    if (!isset($scoreInput['diction']) || empty(trim($scoreInput['diction']))) {
+    if (!isset($scoreInput['diction']) || trim((string)$scoreInput['diction']) === '') {
         return error422('Enter diction score');
     }
-    if (!isset($scoreInput['stage_presence']) || empty(trim($scoreInput['stage_presence']))) {
+    if (!isset($scoreInput['stage_presence']) || trim((string)$scoreInput['stage_presence']) === '') {
         return error422('Enter stage presence score');
     }
-    if (!isset($scoreInput['entertainment_value']) || empty(trim($scoreInput['entertainment_value']))) {
+    if (!isset($scoreInput['entertainment_value']) || trim((string)$scoreInput['entertainment_value']) === '') {
         return error422('Enter entertainment value score');
     }
 

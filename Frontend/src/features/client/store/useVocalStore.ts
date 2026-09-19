@@ -1,140 +1,118 @@
 import { defineStore } from "pinia";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { vocalService } from "../services/vocalService";
-import { ref, toRaw, watchEffect } from "vue";
-import { useToast } from "../../shared/composables/useToast";
-import type { CreateVocalScoreParams, VocalScoreErrorResponse } from "../types/vocal/types";
-import type { AxiosError } from "axios";
-import { appErrorHandler } from "../../errors/appErrorHandler";
-import type { CandidateTeamOptions } from "../types/talent/types";
-import { useLoadingStore } from "../../../shared/store/useLoadingState";
-import { useGlobalErrorSetter } from "../../../shared/store/useGlobalErrorState";
+import { reactive, readonly, ref, toRaw, watchEffect } from "vue";
 import { useLocalStorage } from "@vueuse/core";
+import type { AxiosError } from "axios";
+
+import { vocalService } from "../services/vocalService";
+import { appErrorHandler } from "../../errors/appErrorHandler";
+import { useToast } from "../../shared/composables/useToast";
+import { useAuthStore } from "../../auth/store/authStore";
+import type { CreateVocalScoreParams, VocalScoreErrorResponse } from "../types/vocal/types";
+
+const INFRA_ERRORS = ["offline", "unreachable", "serverError", "requestTimeout"];
 
 export const useVocalStore = defineStore("vocalScore", () => {
-    const { toast } = useToast()
+    const { toast } = useToast();
+    const authStore = useAuthStore();
 
-    const { setLoading } = useLoadingStore()
-    const { setError } = useGlobalErrorSetter()
+    const scoreInputs = useLocalStorage<Record<string, unknown>[]>("vocal-scores", []);
 
-    type ScoreFields = {
-        candidateId: string | null;
-        candidateName: string | null;
-        candidateTeam: Capitalize<CandidateTeamOptions>;
-        voice_tone_quality: number,
-        mastery_and_timing: number,
-        vocal_expression: number,
-        diction: number,
-        stage_presence: number,
-        entertainment_value: number
-    }[]
-    const submissions = useLocalStorage<Record<string, { submitted: boolean }>>(
-        "vocal-submissions",
-        {}
-    );
+    const enabled = ref(false);
 
-    const setSubmitted = (val: boolean, key: string) => {
-        submissions.value[key] = { submitted: val };
-    };
-
-    const isSubmitted = (key: string) => {
-        return submissions.value[key]?.submitted ?? false;
-    };
-    const vocalCandidatesScoreInput = useLocalStorage<ScoreFields[]>("vocal-scores", []);
-
-    const vocalEnabled = ref(false)
     const getVocalCandidates = useQuery({
-        queryKey: ["vocalCandidates"],
+        queryKey: ["vocalSubjects"],
         queryFn: () => vocalService.getCandidates(),
         staleTime: 15 * 60 * 1000,
         gcTime: 60 * 60 * 1000,
         retry: 3,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
         select: (data) => data.data,
-        enabled: vocalEnabled
+        enabled,
     });
-    const refetchVocalCandidatesFeat = () => getVocalCandidates.refetch()
+
+    /**
+     * The server is the source of truth for "already submitted" - a page refresh,
+     * a cleared browser store or a different device all still lock the inputs.
+     */
+    const getMyVocalScores = useQuery({
+        queryKey: ["myVocalScores"],
+        queryFn: () => vocalService.getMyVocalScores(),
+        staleTime: 15 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+        select: (data) => data.data,
+        enabled,
+    });
+
+    const refetchVocalFeat = () => {
+        getVocalCandidates.refetch();
+        getMyVocalScores.refetch();
+    };
 
     const createVocalScoreMutation = useMutation({
-        mutationFn: async (data: CreateVocalScoreParams[]) => {
-            const results = await Promise.allSettled(data.map(d =>
-                vocalService.createVocalScore(
-                    {
-                        cand_id: d.cand_id,
-                        voice_tone_quality: d.voice_tone_quality,
-                        mastery_and_timing: d.mastery_and_timing,
-                        vocal_expression: d.vocal_expression,
-                        diction: d.diction,
-                        stage_presence: d.stage_presence,
-                        entertainment_value: d.entertainment_value
-                    })
-            ))
-            const failures = results.filter(d => d.status === "rejected")
-            if (failures.length > 0) throw (failures[0] as PromiseRejectedResult).reason
-            return results.filter(d => d.status === "fulfilled").map(v => v.value)
+        mutationFn: (scores: CreateVocalScoreParams[]) => vocalService.createVocalScoreBatch(scores),
+        onMutate: () => ({ backupScores: structuredClone(toRaw(scoreInputs.value)) }),
+        onSuccess: (res) => {
+            if (typeof res.has_submitted === "boolean") {
+                authStore.setUserMetaDataAfterScoreSubmit(res.has_submitted);
+            }
+            getMyVocalScores.refetch().catch(() => {});
+            toast.success("All scores submitted successfully!");
         },
-        onMutate: () => {
-            const backupScores = structuredClone(toRaw(vocalCandidatesScoreInput.value))
-            return { backupScores }
-        },
-        onSuccess: () => {
-            setSubmitted(true, "vocal-submitted")
-            toast.success("All scores submitted successfully!")
-        },
-        onError: (err: AxiosError<VocalScoreErrorResponse>, _, context) => {
-            const parsed = appErrorHandler(err)
-            const infraMaps = ["offline", "unreachable", "serverError", "requestTimeout"]
-            console.error(parsed.err)
-            if (infraMaps.includes(parsed.type)) toast.error(parsed.message);
+        onError: (err: AxiosError<VocalScoreErrorResponse>, _vars, context) => {
+            const parsed = appErrorHandler(err);
+            if (INFRA_ERRORS.includes(parsed.type)) toast.error(parsed.message);
+            if (parsed.err.status === 422 || parsed.err.status === 409) {
+                toast.error("You have already submitted your scores for this category.");
+                getMyVocalScores.refetch().catch(() => {});
+                return;
+            }
             if (context?.backupScores) {
-                vocalCandidatesScoreInput.value = structuredClone(context.backupScores);
+                scoreInputs.value = structuredClone(context.backupScores);
                 toast.info("Vocal scores have been restored. Please try again.");
             }
-        }
-    })
-    const createVocalScore = (data: CreateVocalScoreParams[]) => {
-        if (isSubmitted("vocal-submitted")) {
-            toast.info("You’ve already submitted scores for these candidates.");
-            return
-        }
-        return createVocalScoreMutation.mutateAsync(data)
-    }
+        },
+    });
+
+    const createVocalScore = (data: CreateVocalScoreParams[]) =>
+        createVocalScoreMutation.mutateAsync(data);
+
+    /** Ids this judge has already scored, as strings, for per-row disabling. */
+    const scoredVocalIds = () =>
+        new Set((getMyVocalScores.data.value ?? []).map((s) => String(s.cand_id)));
+
+    const fetchError = reactive({ serverError: false, offline: false });
 
     watchEffect(() => {
-        setLoading("vocalCandidates", "initialFetching", getVocalCandidates.isPending.value || getVocalCandidates.isLoading.value)
-        setLoading("vocalCandidates", "fetchRefresh", getVocalCandidates.isFetching.value)
+        const subjectsFailed = getVocalCandidates.isError.value;
+        const myScoresFailed = getMyVocalScores.isError.value;
 
-        setLoading("vocalCandidates", "createVocalScore", createVocalScoreMutation.isPending.value)
-
-
-        if (getVocalCandidates.data.value) {
-            setError("vocalCandidates", "fetchOffline", false)
-            setError("vocalCandidates", "fetchServerError", false)
-        }
-    })
-
-    watchEffect(() => {
-
-        if (getVocalCandidates.isError.value) {
-            const vocalErr = getVocalCandidates.error.value as AxiosError<VocalScoreErrorResponse>
-            if (vocalErr) {
-                const { type, } = appErrorHandler(vocalErr)
-                if (type === "offline") { setError("vocalCandidates", "fetchOffline", true) }
-                if (type === "serverError" || type === "unreachable" || type === "requestTimeout") {
-                    setError("vocalCandidates", "fetchServerError", true)
-                }
+        if (subjectsFailed || myScoresFailed) {
+            const error = (subjectsFailed
+                ? getVocalCandidates.error.value
+                : getMyVocalScores.error.value) as AxiosError<VocalScoreErrorResponse>;
+            if (error) {
+                const { type } = appErrorHandler(error);
+                fetchError.offline = type === "offline";
+                fetchError.serverError =
+                    type === "serverError" || type === "unreachable" || type === "requestTimeout";
             }
+        } else if (getVocalCandidates.isSuccess.value && getMyVocalScores.isSuccess.value) {
+            fetchError.offline = false;
+            fetchError.serverError = false;
         }
-
-    })
+    });
 
     return {
         getVocalCandidates,
-        refetchVocalCandidatesFeat,
+        getMyVocalScores,
+        scoredVocalIds,
+        refetchVocalFeat,
         createVocalScore,
-        submissions,
-        enableVocal: () => vocalEnabled.value = true,
-        setSubmitted,
-        isSubmitted,
-    }
-})
+        createVocalScoreMutation,
+        fetchError: readonly(fetchError),
+        enableVocal: () => (enabled.value = true),
+    };
+});
