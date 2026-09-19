@@ -1,4 +1,3 @@
-import type { CandidateTeamOptions } from "../shared/types"
 
 export type CreateVocalScoreParams = {
     cand_id: number,
@@ -19,7 +18,8 @@ export type GetVocalCandidatesDTO = {
 export type VocalCandidates = {
     cand_id: string,
     cand_name: string,
-    cand_team: CandidateTeamOptions,
+    /** Team display name, joined server-side. */
+    cand_team: string,
     created_at: string
 }
 
@@ -27,7 +27,7 @@ export type CreateVocalScoreDTO = {
     status: number,
     message: string,
     has_submitted?: boolean,
-    results?: { cand_id: number, score_id: number, total_score: string }[]
+    results?: { subject_id: number, score_id: number, total_score: string }[]
 }
 
 export type MyVocalScoreDTO = {

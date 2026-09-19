@@ -1,11 +1,19 @@
-import type { CandidateTeamOptions } from "../../client/types/shared/types"
+import type { TeamData, GetTeamsDTO } from "./teams"
 
-export type { CandidateTeamOptions }
+export type { TeamData, GetTeamsDTO }
+
+export type GenderOptions = "male" | "female" | "other"
+
+export const GENDER_OPTIONS: GenderOptions[] = ["male", "female", "other"]
 
 export type ContestantData = {
     cand_id: string,
+    cand_number: string,
     cand_name: string,
-    cand_team: CandidateTeamOptions,
+    team_id: string,
+    /** Display name of the team, joined server-side. */
+    cand_team: string,
+    cand_gender: GenderOptions,
     created_at: string
 }
 
@@ -16,8 +24,10 @@ export type GetContestantsDTO = {
 }
 
 export type CreateContestantParams = {
+    cand_number: string,
     cand_name: string,
-    cand_team: CandidateTeamOptions,
+    team_id: string,
+    cand_gender: GenderOptions,
 }
 
 export type UpdateContestantParams = { cand_id: string } & CreateContestantParams

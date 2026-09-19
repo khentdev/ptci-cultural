@@ -5,8 +5,8 @@ export const SCOREBOARD_CATEGORIES: Record<ScoreboardCategoryKey, ScoreboardCate
         key: "vocal",
         label: "Vocal Solo",
         subject: "contestant",
-        judgesPath: "/category/vocal_solo/getJudgeScore.php",
-        finalPath: "/category/vocal_solo/vocalFinalScore.php",
+        judgesPath: "/scores/vocal/judges",
+        finalPath: "/scores/vocal/final",
         criteria: [
             { key: "voice_tone_quality", label: "Voice/Tone Quality", max: 30 },
             { key: "mastery_and_timing", label: "Mastery and Timing", max: 25 },
@@ -20,8 +20,8 @@ export const SCOREBOARD_CATEGORIES: Record<ScoreboardCategoryKey, ScoreboardCate
         key: "interpretative",
         label: "Interpretative Dance",
         subject: "team",
-        judgesPath: "/category/interpretative_dance/getJudgeScore.php",
-        finalPath: "/category/interpretative_dance/InterpretativeFinalScore.php",
+        judgesPath: "/scores/interpretative/judges",
+        finalPath: "/scores/interpretative/final",
         criteria: [
             { key: "originality", label: "Originality", max: 25 },
             { key: "mastery_of_steps", label: "Mastery of Steps", max: 15 },
@@ -34,8 +34,8 @@ export const SCOREBOARD_CATEGORIES: Record<ScoreboardCategoryKey, ScoreboardCate
         key: "modern",
         label: "Modern Dance",
         subject: "team",
-        judgesPath: "/category/modern_dance/getJudgeScore.php",
-        finalPath: "/category/modern_dance/modernFinalScore.php",
+        judgesPath: "/scores/modern/judges",
+        finalPath: "/scores/modern/final",
         criteria: [
             { key: "mastery_of_steps", label: "Mastery of Steps", max: 25 },
             { key: "choreography_and_style", label: "Choreography and Style", max: 30 },

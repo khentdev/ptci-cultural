@@ -2,6 +2,12 @@ import type { RouteRecordRaw } from "vue-router";
 
 export const settingsRoutes: RouteRecordRaw[] = [
     {
+        path: "settings/manage-teams",
+        name: "manage-teams",
+        meta: { requiresAuth: true },
+        component: () => import("./views/ManageTeams.vue"),
+    },
+    {
         path: "settings/manage-contestants",
         name: "manage-contestants",
         meta: { requiresAuth: true },

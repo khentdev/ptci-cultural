@@ -1,4 +1,3 @@
-import type { CandidateTeamOptions } from "../shared/types"
 
 export type CreateModernScoreParams = {
     team_id: number,
@@ -17,7 +16,8 @@ export type GetModernTeamDTO = {
 
 export type ModernTeam = {
     team_id: string,
-    team: CandidateTeamOptions,
+    /** Display name as stored, e.g. "Red Avengers". */
+    team: string,
     created_at: string
 }
 
@@ -25,7 +25,7 @@ export type CreateModernScoreDTO = {
     status: number,
     message: string,
     has_submitted?: boolean,
-    results?: { team_id: number, score_id: number, total_score: string }[]
+    results?: { subject_id: number, score_id: number, total_score: string }[]
 }
 
 export type MyModernScoreDTO = {

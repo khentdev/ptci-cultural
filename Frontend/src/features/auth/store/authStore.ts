@@ -100,7 +100,12 @@ export const useAuthStore = defineStore("auth", () => {
                 loginErrors.general = parsed.message
             }
             if (error.response?.data.status === 401 || error.response?.data.status === 422) {
-                loginErrors.invalidCredentials = "Invalid username or password."
+                // A deactivated account also answers 401; show the server's reason so the
+                // judge is not left guessing at their password.
+                const serverMessage = error.response?.data?.message
+                loginErrors.invalidCredentials = /deactivat/i.test(serverMessage ?? "")
+                    ? serverMessage
+                    : "Invalid username or password."
             }
             if (error.response?.status === 429) {
                 loginErrors.general = error.response.data?.message

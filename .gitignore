@@ -5,5 +5,9 @@ dist/
 *.log
 .DS_Store
 
-# local reference copy, not part of the build
+# never commit real credentials (the talent-night copy shipped an environment.txt)
+environment.*
+!.env.example
+
+# talent-night donor copy kept locally for reference, not part of the build
 ptci_tabulation/

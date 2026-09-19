@@ -9,19 +9,17 @@ import type {
 
 export const interpretativeService = {
     getTeams: async () => {
-        const res = await axiosInstance.get("/teams/readTeams.php")
+        const res = await axiosInstance.get("/teams")
         return GetTypedResponse<GetInterpretativeTeamDTO>(res)
     },
 
-    /** One all-or-nothing POST; replaces the old per-row fan-out. */
     createInterpretativeScoreBatch: async (data: CreateInterpretativeScoreParams[]) => {
-        const res = await axiosInstance.post("/category/interpretative_dance/batchScore.php", data)
+        const res = await axiosInstance.post("/scores/interpretative/batch", data)
         return GetTypedResponse<CreateInterpretativeScoreDTO>(res)
     },
 
-    /** Scores the signed-in judge has already committed for this category. */
     getMyInterpretativeScores: async () => {
-        const res = await axiosInstance.get("/category/interpretative_dance/myScores.php")
+        const res = await axiosInstance.get("/scores/interpretative/mine")
         return GetTypedResponse<GetMyInterpretativeScoresResponse>(res)
     },
 }
