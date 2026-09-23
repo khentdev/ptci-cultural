@@ -1,7 +1,7 @@
+import { useScoreDrafts, SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
 import { defineStore } from "pinia";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { reactive, readonly, ref, toRaw, watchEffect } from "vue";
-import { useLocalStorage } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
 import { vocalService } from "../services/vocalService";
@@ -16,7 +16,7 @@ export const useVocalStore = defineStore("vocalScore", () => {
     const { toast } = useToast();
     const authStore = useAuthStore();
 
-    const scoreInputs = useLocalStorage<Record<string, unknown>[]>("vocal-scores", []);
+    const scoreInputs = useScoreDrafts<Record<string, unknown>>(SCORE_DRAFT_KEYS.vocal);
 
     const enabled = ref(false);
 

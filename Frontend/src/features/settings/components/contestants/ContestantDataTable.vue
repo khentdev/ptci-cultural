@@ -23,7 +23,7 @@
             <td :class="TABLE_STYLES.TD.bold">{{ c.cand_number }}</td>
             <td :class="TABLE_STYLES.TD.bold">{{ FormatFullName(c.cand_name) }}</td>
             <td :class="TABLE_STYLES.TD.no_bold">
-              <span class="px-2 py-1 rounded text-xs font-medium" :class="getTeamBadgeClasses(c.cand_team)">
+              <span class="px-2 py-1 rounded text-xs font-medium text-nowrap" :class="getTeamBadgeClasses(c.cand_team)">
                 {{ getFormattedTeamLabel(c.cand_team) }}
               </span>
             </td>

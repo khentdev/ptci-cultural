@@ -34,12 +34,12 @@
           routeName: "vocal-solo",
         },
         {
-          label: "Interpretative Dance",
-          routeName: "interpretative-dance",
-        },
-        {
           label: "Modern Dance",
           routeName: "modern-dance",
+        },
+        {
+          label: "Cultural Dance",
+          routeName: "cultural-dance",
         },
       ],
     }

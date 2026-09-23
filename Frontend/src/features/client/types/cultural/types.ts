@@ -1,5 +1,5 @@
 
-export type CreateInterpretativeScoreParams = {
+export type CreateCulturalScoreParams = {
     team_id: number,
     originality: number,
     mastery_of_steps: number,
@@ -8,26 +8,26 @@ export type CreateInterpretativeScoreParams = {
     stage_presence: number,
 }
 
-export type GetInterpretativeTeamDTO = {
+export type GetCulturalTeamDTO = {
     status: number,
     message: string,
-    data: InterpretativeTeam[]
+    data: CulturalTeam[]
 }
 
-export type InterpretativeTeam = {
+export type CulturalTeam = {
     team_id: string,
     team: string,
     created_at: string
 }
 
-export type CreateInterpretativeScoreDTO = {
+export type CreateCulturalScoreDTO = {
     status: number,
     message: string,
     has_submitted?: boolean,
     results?: { subject_id: number, score_id: number, total_score: string }[]
 }
 
-export type MyInterpretativeScoreDTO = {
+export type MyCulturalScoreDTO = {
     score_id: string,
     team_id: string,
     originality: string,
@@ -39,13 +39,13 @@ export type MyInterpretativeScoreDTO = {
     created_at: string
 }
 
-export type GetMyInterpretativeScoresResponse = {
+export type GetMyCulturalScoresResponse = {
     status: number,
     message: string,
-    data: MyInterpretativeScoreDTO[]
+    data: MyCulturalScoreDTO[]
 }
 
-export type InterpretativeScoreErrorResponse = {
+export type CulturalScoreErrorResponse = {
     status: number,
     message: string
 }

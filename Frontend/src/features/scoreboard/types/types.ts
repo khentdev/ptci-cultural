@@ -1,6 +1,5 @@
-import type { CandidateTeamOptions } from "../../client/types/shared/types"
 
-export type ScoreboardCategoryKey = "vocal" | "interpretative" | "modern"
+export type ScoreboardCategoryKey = "vocal" | "cultural" | "modern"
 
 export type Criterion = { key: string; label: string; max: number }
 
@@ -18,12 +17,14 @@ export type ScoreboardCategory = {
 export type JudgeScoreRow = {
     score_id: string
     judge_id: string
+    /** The judge's username, joined in by the API. */
+    judge_name: string
     total_score: string
     cand_id?: string
     cand_name?: string
-    cand_team?: CandidateTeamOptions
+    cand_team?: string
     team_id?: string
-    team?: CandidateTeamOptions
+    team?: string
 } & Record<string, string | undefined>
 
 /** Keyed "judge_<id>" by the backend. */
@@ -40,9 +41,9 @@ export type FinalScoreRow = {
     updated_at?: string
     cand_id?: string
     cand_name?: string
-    cand_team?: CandidateTeamOptions
+    cand_team?: string
     team_id?: string
-    team?: CandidateTeamOptions
+    team?: string
 }
 
 export type GetFinalScoresDTO = {

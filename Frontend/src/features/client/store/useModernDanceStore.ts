@@ -1,7 +1,7 @@
+import { useScoreDrafts, SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
 import { defineStore } from "pinia";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { reactive, readonly, ref, toRaw, watchEffect } from "vue";
-import { useLocalStorage } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
 import { modernService } from "../services/modernService";
@@ -16,7 +16,7 @@ export const useModernDanceStore = defineStore("modernScore", () => {
     const { toast } = useToast();
     const authStore = useAuthStore();
 
-    const scoreInputs = useLocalStorage<Record<string, unknown>[]>("modern-dance-scores", []);
+    const scoreInputs = useScoreDrafts<Record<string, unknown>>(SCORE_DRAFT_KEYS.modern);
 
     const enabled = ref(false);
 

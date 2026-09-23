@@ -14,15 +14,15 @@ export const clientRoutes: RouteRecordRaw[] = [
         component: () => import("./categories/Vocal.vue"),
     },
     {
-        path: "interpretative-dance",
-        name: "interpretative-dance",
-        meta: { requiresAuth: true },
-        component: () => import("./categories/Interpretative.vue"),
-    },
-    {
         path: "modern-dance",
         name: "modern-dance",
         meta: { requiresAuth: true },
         component: () => import("./categories/Modern.vue"),
+    },
+    {
+        path: "cultural-dance",
+        name: "cultural-dance",
+        meta: { requiresAuth: true },
+        component: () => import("./categories/CulturalDance.vue"),
     },
 ];

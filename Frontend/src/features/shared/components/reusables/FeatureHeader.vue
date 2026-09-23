@@ -1,6 +1,7 @@
 <template>
   <div
-    class="bg-gray-50 md:px-6 md:py-4 px-4 py-4 items-center border-b border-gray-200 flex justify-between"
+    :class="SURFACE_STYLES.GLASS_HEADER"
+    class="md:px-6 md:py-4 px-4 py-4 items-center flex justify-between"
   >
     <div>
       <h2 class="md:text-xl text-lg font-semibold text-gray-800">
@@ -41,6 +42,7 @@
 <script lang="ts" setup>
 import { Plus ,Menu} from "lucide-vue-next";
 import { useDeviceDetection } from "../../composables/useDeviceDetection";
+import { SURFACE_STYLES } from "../../constants/surfaceStyles";
 
 const { isMobile } = useDeviceDetection();
 withDefaults(

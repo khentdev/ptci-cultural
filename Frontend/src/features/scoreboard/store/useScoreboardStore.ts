@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useQuery } from "@tanstack/vue-query";
 import { computed, reactive, readonly, ref, watchEffect } from "vue";
+import type { Ref } from "vue";
 import type { AxiosError } from "axios";
 
 import { scoreboardService } from "../services/scoreboardService";
@@ -29,19 +30,55 @@ export const normalizeFinalRow = (row: FinalScoreRow) => ({
 export type NormalizedFinalRow = ReturnType<typeof normalizeFinalRow>;
 
 /**
+ * One { serverError, offline } pair per query. The judges and final endpoints are
+ * independent and now live on separate pages, so a failure on one must not black
+ * out the other one's page.
+ */
+const deriveFetchError = <TError>(query: {
+    isError: Ref<boolean>;
+    isSuccess: Ref<boolean>;
+    error: Ref<TError>;
+}) => {
+    const state = reactive({ serverError: false, offline: false });
+
+    watchEffect(() => {
+        if (query.isError.value) {
+            const error = query.error.value as AxiosError<ScoreboardErrorResponse> | null;
+            if (!error) return;
+
+            const { type, err } = appErrorHandler(error);
+            // 404 just means nobody has scored yet - that is an empty state, not an error.
+            const isEmpty = err.status === 404;
+            state.offline = !isEmpty && type === "offline";
+            state.serverError =
+                !isEmpty &&
+                (type === "serverError" || type === "unreachable" || type === "requestTimeout");
+        } else if (query.isSuccess.value) {
+            state.offline = false;
+            state.serverError = false;
+        }
+    });
+
+    return readonly(state);
+};
+
+/**
  * One store instance per category, so /dashboard/scores/vocal and .../modern
  * keep separate caches and separate error state.
  */
 export const useScoreboardStore = (category: ScoreboardCategoryKey) =>
     defineStore(`scoreboard-${category}`, () => {
-        const enabled = ref(false);
+        // Neither endpoint is fetched until a page that actually renders it opts in,
+        // so opening one category page never pulls the other page's data.
+        const judgesEnabled = ref(false);
+        const finalEnabled = ref(false);
 
         const judgeScores = useQuery({
             queryKey: ["scoreboard", category, "judges"],
             queryFn: () => scoreboardService.getJudgeScores(category),
             ...QUERY_OPTIONS,
             select: (data) => data.data,
-            enabled,
+            enabled: judgesEnabled,
         });
 
         const finalScores = useQuery({
@@ -49,7 +86,7 @@ export const useScoreboardStore = (category: ScoreboardCategoryKey) =>
             queryFn: () => scoreboardService.getFinalScores(category),
             ...QUERY_OPTIONS,
             select: (data) => data.data,
-            enabled,
+            enabled: finalEnabled,
         });
 
         const rankedFinalScores = computed(() =>
@@ -60,43 +97,22 @@ export const useScoreboardStore = (category: ScoreboardCategoryKey) =>
 
         const topThree = computed(() => rankedFinalScores.value.slice(0, 3));
 
-        const refetchAll = () => {
-            judgeScores.refetch();
-            finalScores.refetch();
-        };
+        const refetchJudgeScores = () => judgeScores.refetch();
+        const refetchFinalScores = () => finalScores.refetch();
 
-        const fetchError = reactive({ serverError: false, offline: false });
-
-        watchEffect(() => {
-            const judgesFailed = judgeScores.isError.value;
-            const finalFailed = finalScores.isError.value;
-
-            if (judgesFailed || finalFailed) {
-                const error = (judgesFailed
-                    ? judgeScores.error.value
-                    : finalScores.error.value) as AxiosError<ScoreboardErrorResponse>;
-                if (error) {
-                    const { type, err } = appErrorHandler(error);
-                    // 404 just means nobody has scored yet - that is an empty state, not an error.
-                    const isEmpty = err.status === 404;
-                    fetchError.offline = !isEmpty && type === "offline";
-                    fetchError.serverError =
-                        !isEmpty &&
-                        (type === "serverError" || type === "unreachable" || type === "requestTimeout");
-                }
-            } else if (judgeScores.isSuccess.value && finalScores.isSuccess.value) {
-                fetchError.offline = false;
-                fetchError.serverError = false;
-            }
-        });
+        const judgesFetchError = deriveFetchError(judgeScores);
+        const finalFetchError = deriveFetchError(finalScores);
 
         return {
             judgeScores,
             finalScores,
             rankedFinalScores,
             topThree,
-            refetchAll,
-            fetchError: readonly(fetchError),
-            enable: () => (enabled.value = true),
+            refetchJudgeScores,
+            refetchFinalScores,
+            judgesFetchError,
+            finalFetchError,
+            enableJudgeScores: () => (judgesEnabled.value = true),
+            enableFinalScores: () => (finalEnabled.value = true),
         };
     })();

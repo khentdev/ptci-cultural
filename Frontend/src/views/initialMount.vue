@@ -18,7 +18,7 @@
         return
       }
 
-      if (authStore.getUserMetaData?.role === "admin") await router.push({ name: "dashboard-overview" });
+      if (authStore.getUserMetaData?.role === "admin") await router.push({ name: "scoreboard-vocal" });
       else await router.push({ name: "judge-home" })
     }
   });

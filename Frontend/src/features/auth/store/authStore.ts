@@ -1,3 +1,5 @@
+import { clearAllScoreDrafts } from "../../client/composables/useScoreDrafts";
+import { queryClient } from "../../../core/API/queryClient";
 import type { AxiosError } from "axios";
 import { defineStore } from "pinia";
 import { computed, reactive, readonly, ref } from "vue";
@@ -72,6 +74,12 @@ export const useAuthStore = defineStore("auth", () => {
         userMetaData.value = null
         setLogin.value = null
         loadingState.sessionInitialized = false
+
+        // Judge drafts and the per-judge query cache are keyed per browser, not per
+        // account, so ending ANY session must wipe both - otherwise the next person
+        // to sign in on this device inherits the previous judge's inputs.
+        clearAllScoreDrafts()
+        queryClient.clear()
     }
     const getUserMetaData = computed(() => userMetaData.value)
 

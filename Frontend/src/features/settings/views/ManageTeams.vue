@@ -1,6 +1,6 @@
 <template>
   <section class="min-h-screen p-3 overflow-x-auto flex flex-col items-center justify-center">
-    <div class="w-full max-w-full mt-12 rounded-2xl" :class="{ 'border border-gray-200': !getTeams.isPending }">
+    <div class="w-full max-w-full mt-12 rounded-2xl" :class="getTeams.isPending ? '' : SURFACE_STYLES.GLASS_CARD">
       <div class="overflow-hidden rounded-2xl">
         <FeatureOfflineState v-if="fetchError.offline || isOffline" />
         <DataLoadingState v-else-if="getTeams.isPending" />
@@ -9,7 +9,7 @@
             <InlineFetchIndicator v-show="getTeams.isFetching" />
             <FeatureHeader :has-icon="true" :action-fn="toggleForm" action-fn-name="Add Team" title="Manage Teams"
               action-fn-title="Add new team"
-              description="Teams are scored directly in Interpretative and Modern Dance, and every contestant belongs to one." />
+              description="Teams are scored directly in Cultural and Modern Dance, and every contestant belongs to one." />
             <TeamDataTable />
           </div>
         </template>
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { SURFACE_STYLES } from "../../shared/constants/surfaceStyles";
 import InlineFetchIndicator from "../../shared/components/reusables/InlineFetchIndicator.vue";
 import FeatureHeader from "../../shared/components/reusables/FeatureHeader.vue";
 import DataLoadingState from "../../shared/components/reusables/DataLoadingState.vue";

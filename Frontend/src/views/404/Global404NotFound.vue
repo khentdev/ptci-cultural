@@ -67,7 +67,7 @@ const router = useRouter();
 
   const homeRoute = () => {
     const role = authStore.getUserMetaData?.role;
-    if (role === "admin") return { name: "dashboard-overview" };
+    if (role === "admin") return { name: "scoreboard-vocal" };
     if (role === "judge") return { name: "judge-home" };
     return { name: "login" };
   };

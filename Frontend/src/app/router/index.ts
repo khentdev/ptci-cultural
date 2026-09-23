@@ -4,7 +4,6 @@ import type { RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "../../features/auth/store/authStore";
 import { authRoutes } from "../../features/auth/authRoutes";
 import { clientRoutes } from "../../features/client/clientRoutes";
-import { dashboardRoutes } from "../../features/dashboard/dashboardRoutes";
 import { scoreboardRoutes } from "../../features/scoreboard/scoreboardRoutes";
 import { settingsRoutes } from "../../features/settings/settingsRoutes";
 
@@ -33,10 +32,9 @@ const routes: RouteRecordRaw[] = [
         path: "/dashboard",
         name: "dashboard",
         meta: { requiresAuth: true, role: "admin" },
-        redirect: { name: "dashboard-overview" },
+        redirect: { name: "scoreboard-vocal" },
         component: () => import("../layouts/dashboardLayout.vue"),
         children: [
-            ...dashboardRoutes,
             ...scoreboardRoutes,
             ...settingsRoutes,
             {
@@ -84,7 +82,7 @@ router.beforeEach(async (to) => {
 
     const required = to.matched.find((r) => r.meta.role)?.meta.role;
     if (required && user.role !== required) {
-        return { name: user.role === "admin" ? "dashboard-overview" : "judge-home" };
+        return { name: user.role === "admin" ? "scoreboard-vocal" : "judge-home" };
     }
 
     return true;

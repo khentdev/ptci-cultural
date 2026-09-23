@@ -1,25 +1,25 @@
 import axiosInstance from "../../../core/API/axiosConfig";
 import { GetTypedResponse } from "../../shared/types/typedResponse";
 import type {
-    CreateInterpretativeScoreDTO,
-    CreateInterpretativeScoreParams,
-    GetInterpretativeTeamDTO,
-    GetMyInterpretativeScoresResponse,
-} from "../types/interpretative/types";
+    CreateCulturalScoreDTO,
+    CreateCulturalScoreParams,
+    GetCulturalTeamDTO,
+    GetMyCulturalScoresResponse,
+} from "../types/cultural/types";
 
-export const interpretativeService = {
+export const culturalService = {
     getTeams: async () => {
         const res = await axiosInstance.get("/teams")
-        return GetTypedResponse<GetInterpretativeTeamDTO>(res)
+        return GetTypedResponse<GetCulturalTeamDTO>(res)
     },
 
-    createInterpretativeScoreBatch: async (data: CreateInterpretativeScoreParams[]) => {
-        const res = await axiosInstance.post("/scores/interpretative/batch", data)
-        return GetTypedResponse<CreateInterpretativeScoreDTO>(res)
+    createCulturalScoreBatch: async (data: CreateCulturalScoreParams[]) => {
+        const res = await axiosInstance.post("/scores/cultural/batch", data)
+        return GetTypedResponse<CreateCulturalScoreDTO>(res)
     },
 
-    getMyInterpretativeScores: async () => {
-        const res = await axiosInstance.get("/scores/interpretative/mine")
-        return GetTypedResponse<GetMyInterpretativeScoresResponse>(res)
+    getMyCulturalScores: async () => {
+        const res = await axiosInstance.get("/scores/cultural/mine")
+        return GetTypedResponse<GetMyCulturalScoresResponse>(res)
     },
 }

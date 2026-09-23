@@ -1,7 +1,8 @@
 <template>
   <div class="flex items-center justify-center min-h-screen">
     <div
-      class="relative flex flex-col items-center justify-center max-w-lg px-8 py-12 mx-4 text-center bg-white border border-gray-200/50 shadow-2xl shadow-black/10 rounded-3xl backdrop-blur-sm">
+      :class="SURFACE_STYLES.GLASS_PANEL"
+      class="relative flex flex-col items-center justify-center max-w-lg px-8 py-12 mx-4 text-center">
       <div class="relative mb-8">
         <div class="text-8xl font-bold text-primary font-poppins relative">
           <span class="relative z-10">404</span>
@@ -40,6 +41,7 @@
 </template>
 
 <script lang="ts" setup>
+  import { SURFACE_STYLES } from "../../constants/surfaceStyles";
   import { Home, ArrowLeft } from "lucide-vue-next";
   import { useRouter } from "vue-router";
   import { useAuthStore } from "../../../auth/store/authStore";
@@ -49,7 +51,7 @@
 
   const homeRoute = () => {
     const role = authStore.getUserMetaData?.role;
-    if (role === "admin") return { name: "dashboard-overview" };
+    if (role === "admin") return { name: "scoreboard-vocal" };
     if (role === "judge") return { name: "judge-home" };
     return { name: "login" };
   };

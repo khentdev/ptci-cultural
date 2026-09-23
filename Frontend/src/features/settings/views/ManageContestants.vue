@@ -1,6 +1,6 @@
 <template>
   <section class="min-h-screen p-3 overflow-x-auto flex flex-col items-center justify-center">
-    <div class="w-full max-w-full mt-12 rounded-2xl" :class="{ 'border border-gray-200': !getContestants.isPending }">
+    <div class="w-full max-w-full mt-12 rounded-2xl" :class="getContestants.isPending ? '' : SURFACE_STYLES.GLASS_CARD">
       <div class="overflow-hidden rounded-2xl">
         <FeatureOfflineState v-if="fetchError.offline || isOffline" />
         <DataLoadingState v-else-if="getContestants.isPending" />
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { SURFACE_STYLES } from "../../shared/constants/surfaceStyles";
 import InlineFetchIndicator from "../../shared/components/reusables/InlineFetchIndicator.vue";
 import FeatureHeader from "../../shared/components/reusables/FeatureHeader.vue";
 import DataLoadingState from "../../shared/components/reusables/DataLoadingState.vue";

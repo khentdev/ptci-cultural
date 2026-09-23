@@ -17,10 +17,10 @@
           </tr>
         </thead>
         <tbody :class="TABLE_STYLES.TBODY">
-          <template v-for="(group, groupIndex) in judgeGroups" :key="group.judgeKey">
+          <template v-for="group in judgeGroups" :key="group.judgeKey">
             <tr v-for="(row, rowIndex) in group.rows" :key="row.score_id" class="hover:bg-gray-50 transition-colors">
               <td :class="TABLE_STYLES.TD.bold">
-                <span v-if="rowIndex === 0">Judge {{ groupIndex + 1 }}</span>
+                <span v-if="rowIndex === 0">{{ group.label }}</span>
               </td>
               <td v-if="category.subject === 'contestant'" :class="TABLE_STYLES.TD.bold">
                 {{ FormatFullName(row.cand_name ?? "-") }}
@@ -60,9 +60,13 @@
     isError?: boolean;
   }>();
 
-  // The backend already groups rows under "judge_<id>" keys; judges stay anonymous
-  // in the UI and are labelled positionally.
+  // The backend already groups rows by judge id and joins in each judge's username,
+  // so label the group with that. Positional fallback covers a row without a name.
   const judgeGroups = computed(() =>
-    Object.entries(props.data ?? {}).map(([judgeKey, rows]) => ({ judgeKey, rows }))
+    Object.entries(props.data ?? {}).map(([judgeKey, rows], index) => ({
+      judgeKey,
+      rows,
+      label: rows[0]?.judge_name || `Judge ${index + 1}`,
+    }))
   );
 </script>

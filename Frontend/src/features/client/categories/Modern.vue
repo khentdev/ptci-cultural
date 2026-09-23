@@ -11,7 +11,7 @@
                     :action-fn="openConfirmationModal" :should-show-action-button="!hasSubmittedAll"
                     description="Provide modern dance performance scores for each team." />
 
-                <ModernDataTable :retry-fn="refetchModernFeat" ref="scoreDataTable" input-key="modern-dance-scores"
+                <ModernDataTable :retry-fn="refetchModernFeat" ref="scoreDataTable" :input-key="SCORE_DRAFT_KEYS.modern"
                     :is-loading="getModernTeams.isFetching" :is-error="fetchError.serverError" />
             </div>
         </template>
@@ -25,6 +25,7 @@
 </template>
 
 <script lang="ts" setup>
+    import { SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
     import { computed, onMounted, ref } from 'vue';
     import FeatureBaseComponent from '../components/reusables/FeatureBaseComponent.vue';
     import FeatureOfflineState from '../../shared/components/reusables/FeatureOfflineState.vue';
