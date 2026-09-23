@@ -25,10 +25,4 @@ export const settingsRoutes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
         component: () => import("./views/ManageAdminAccounts.vue"),
     },
-    {
-        path: "settings/activity-logs",
-        name: "activity-logs",
-        meta: { requiresAuth: true },
-        component: () => import("./views/ActivityLogs.vue"),
-    },
 ];

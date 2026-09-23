@@ -1,3 +1,4 @@
+import { teamOrderSql } from '../scoring/teamOrder.js'
 import type { ResultSetHeader, RowDataPacket } from 'mysql2'
 import type { Pool, PoolConnection } from 'mysql2/promise'
 import { getPool } from '../db/pool.js'
@@ -30,7 +31,7 @@ function subjectJoin(cat: CategoryConfig): string {
 
 /** Contestants order by their printed number; teams have none, so order by name. */
 function subjectOrder(cat: CategoryConfig): string {
-  return cat.subject.kind === 'contestant' ? 'CAST(c.cand_number AS UNSIGNED) ASC' : 'c.team ASC'
+  return cat.subject.kind === 'contestant' ? 'CAST(c.cand_number AS UNSIGNED) ASC' : teamOrderSql('c.team')
 }
 
 function subjectGroupBy(cat: CategoryConfig): string {

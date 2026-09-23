@@ -16,12 +16,12 @@ export const SCOREBOARD_CATEGORIES: Record<ScoreboardCategoryKey, ScoreboardCate
             { key: "entertainment_value", label: "Entertainment Value", max: 10 },
         ],
     },
-    interpretative: {
-        key: "interpretative",
-        label: "Interpretative Dance",
+    cultural: {
+        key: "cultural",
+        label: "Cultural Dance",
         subject: "team",
-        judgesPath: "/scores/interpretative/judges",
-        finalPath: "/scores/interpretative/final",
+        judgesPath: "/scores/cultural/judges",
+        finalPath: "/scores/cultural/final",
         criteria: [
             { key: "originality", label: "Originality", max: 25 },
             { key: "mastery_of_steps", label: "Mastery of Steps", max: 15 },
@@ -45,3 +45,18 @@ export const SCOREBOARD_CATEGORIES: Record<ScoreboardCategoryKey, ScoreboardCate
         ],
     },
 }
+
+/**
+ * Sidebar order and URL generation order. Typed as a non-empty tuple because the
+ * `scores/top-3` redirect resolves against the first entry.
+ */
+export const SCOREBOARD_CATEGORY_ORDER: readonly [ScoreboardCategoryKey, ...ScoreboardCategoryKey[]] = [
+    "vocal",
+    "modern",
+    "cultural",
+]
+
+/** Derived in one place so the router and the sidebar cannot drift apart. */
+export const finalScoresRouteName = (key: ScoreboardCategoryKey) => `scoreboard-${key}-final`
+export const judgeScoresRouteName = (key: ScoreboardCategoryKey) => `scoreboard-${key}-judges`
+export const topThreeRouteName = (key: ScoreboardCategoryKey) => `scoreboard-${key}-top3`

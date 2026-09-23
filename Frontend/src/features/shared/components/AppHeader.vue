@@ -58,7 +58,7 @@
   const allNavRoutes: NavRoute[] = [
     {
       label: "Dashboard",
-      routeName: "dashboard-overview",
+      routeName: "dashboard",
       pathPrefix: "/dashboard",
       role: "admin",
     },

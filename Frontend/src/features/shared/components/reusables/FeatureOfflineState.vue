@@ -4,7 +4,8 @@
     class="relative flex flex-col items-center justify-center overflow-x-auto text-center px-6 py-10"
   >
     <div
-      class="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-200 p-8 mx-auto"
+      :class="SURFACE_STYLES.GLASS_PANEL"
+      class="max-w-md w-full p-8 mx-auto"
     >
       <div class="flex justify-center mb-6">
         <div
@@ -28,5 +29,6 @@
 </template>
 
 <script setup lang="ts">
+import { SURFACE_STYLES } from "../../constants/surfaceStyles";
 import { WifiOff } from "lucide-vue-next";
 </script>

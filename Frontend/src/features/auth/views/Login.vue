@@ -3,46 +3,8 @@
     <div class="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-60"
       :style="{ backgroundImage: `url(${authBg})` }"></div>
 
-    <div
-      class="grid items-center min-h-screen grid-cols-1 gap-8 px-3 p-10 overflow-hidden justify-items-center xl:flex xl:flex-row xl:gap-5">
-      <div class="flex items-center justify-center w-full px-3 mt-8 sm:px-6 md:px-10 xl:order-2">
-        <div class="relative flex justify-center w-full h-48 sm:h-64 md:h-80 lg:h-96">
-          <div :ref="(el) => (cardRefs[0] = el as HTMLDivElement)"
-            class="absolute w-40 h-40 sm:w-52 sm:h-52 md:w-68 md:h-68 lg:w-44 xl:w-94 xl:h-94">
-            <div
-              class="relative w-full h-full overflow-hidden bg-white border border-gray-200 shadow-xl shadow-black/20 rounded-full">
-              <Transition name="fade" mode="out-in">
-                <img loading="lazy" :key="leftCardSrc" :src="leftCardSrc" alt="Left carousel image"
-                  class="object-cover object-center w-full h-full" />
-              </Transition>
-            </div>
-          </div>
-
-          <div :ref="(el) => (cardRefs[1] = el as HTMLDivElement)"
-            class="absolute w-40 h-40 sm:w-52 sm:h-52 md:w-68 md:h-68 lg:w-44 xl:w-94 xl:h-94">
-            <div
-              class="relative w-full h-full overflow-hidden bg-white border border-gray-200 shadow-xl shadow-black/20 rounded-full">
-              <Transition name="fade" mode="out-in">
-                <img loading="lazy" :key="rightCardSrc" :src="rightCardSrc" alt="Right carousel image"
-                  class="object-cover object-center w-full h-full" />
-              </Transition>
-            </div>
-          </div>
-
-          <div :ref="(el) => (cardRefs[2] = el as HTMLDivElement)"
-            class="absolute w-40 h-40 sm:w-52 sm:h-52 md:w-68 md:h-68 lg:w-44 xl:w-94 xl:h-94">
-            <div
-              class="relative w-full h-full overflow-hidden bg-white border border-gray-200 shadow-xl shadow-black/20 rounded-full">
-              <Transition name="fade" mode="out-in">
-                <img loading="lazy" :key="centerCardSrc" :src="centerCardSrc" alt="Center carousel image"
-                  class="object-cover object-center w-full h-full" />
-              </Transition>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-center w-full h-full px-3 sm:px-6 md:px-10 lg:order-1 z-50">
+    <div class="relative flex items-center justify-center min-h-screen px-3 py-10">
+      <div class="flex items-center justify-center w-full px-3 sm:px-6 md:px-10">
         <div
           class="container flex flex-col items-center justify-center max-w-md bg-white border border-gray-200 shadow-2xl shadow-black/30 rounded">
           <div class="flex flex-col items-center justify-center w-full gap-5 p-6 md:gap-10">
@@ -100,11 +62,6 @@
                   </template>
                 </span>
               </button>
-
-              <span
-                class="mt-2 text-gray-700 underline transition-colors duration-300 cursor-pointer hover:text-gray-800 w-fit">
-                Forgot password?
-              </span>
             </form>
           </div>
         </div>
@@ -122,85 +79,17 @@
     LogIn,
     CircleAlert,
   } from "lucide-vue-next";
-  import { ref, onMounted, onUnmounted, reactive } from "vue";
+  import { ref } from "vue";
   import { useAuthStore } from "../store/authStore";
   import { useRouter } from "vue-router";
   import { ACTION_STYLES } from "../../shared/constants/formStyles";
-  import { gsap } from "gsap";
-  import { useDeviceDetection } from "../../shared/composables/useDeviceDetection";
-
-  import M1 from "../../../assets/images/TeamLogo/blue team.png";
-  import M2 from "../../../assets/images/TeamLogo/green team.png";
-  import M3 from "../../../assets/images/TeamLogo/purple team.png";
-  import M4 from "../../../assets/images/TeamLogo/red team.png";
-  import M5 from "../../../assets/images/TeamLogo/yellow team.png";
 
   const router = useRouter();
   const authStore = useAuthStore();
-  const { isMobile } = useDeviceDetection();
 
   const usernameInput = ref("");
   const passwordInput = ref("");
   const isSigningIn = ref(false);
-
-  const cardRefs = ref<HTMLDivElement[]>([]);
-
-  const allImages = [M1, M2, M3, M4, M5];
-  let availableImages = [...allImages];
-
-  function shuffle<T>(array: T[]): T[] {
-    return array
-      .map((item) => ({ item, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ item }) => item);
-  }
-
-  function getUniqueImage(exclude: string[]): string {
-    const remaining = availableImages.filter((img) => !exclude.includes(img));
-    if (remaining.length === 0) {
-      availableImages = shuffle([...allImages]);
-      return getUniqueImage(exclude);
-    }
-    const randomIndex = Math.floor(Math.random() * remaining.length);
-    const selected = remaining[randomIndex];
-    if (typeof selected !== "string") {
-      throw new Error("No image could be selected");
-    }
-    availableImages = availableImages.filter((img) => img !== selected);
-    return selected;
-  }
-
-  const leftCardSrc = ref<string>("");
-  const centerCardSrc = ref<string>("");
-  const rightCardSrc = ref<string>("");
-
-  leftCardSrc.value = getUniqueImage([]);
-  centerCardSrc.value = getUniqueImage([leftCardSrc.value]);
-  rightCardSrc.value = getUniqueImage([leftCardSrc.value, centerCardSrc.value]);
-
-  function updateCardSrc(refToUpdate: typeof leftCardSrc) {
-    refToUpdate.value = getUniqueImage([
-      leftCardSrc.value,
-      centerCardSrc.value,
-      rightCardSrc.value,
-    ]);
-  }
-
-  const getPositions = () => {
-    return isMobile.value
-      ? [
-        { x: -100, y: -40, scale: 0.85, zIndex: 1 },
-        { x: 100, y: -40, scale: 0.85, zIndex: 1 },
-        { x: 0, y: 0, scale: 1, zIndex: 2 },
-      ]
-      : [
-        { x: -200, y: -40, scale: 0.85, zIndex: 1 },
-        { x: 200, y: -40, scale: 0.85, zIndex: 1 },
-        { x: 0, y: 0, scale: 1, zIndex: 2 },
-      ];
-  };
-
-  const positions = reactive(getPositions());
 
   const handleSubmit = async () => {
     const cachedPassword = passwordInput.value.trim();
@@ -217,92 +106,10 @@
         return router.push({ name: "judge" });
       }
       if (success && authStore.getUserMetaData?.role === "admin") {
-        return router.push({ name: "dashboard" });
+        return router.push({ name: "scoreboard-vocal" });
       }
     } finally {
       isSigningIn.value = false;
     }
   };
-
-  onMounted(() => {
-    cardRefs.value.forEach((card, i) => {
-      const pos = positions[i];
-      if (pos && card) {
-        gsap.set(card, {
-          x: pos.x,
-          y: pos.y,
-          scale: pos.scale,
-          zIndex: pos.zIndex,
-        });
-      }
-    });
-
-    const carouselIntervalId = setInterval(() => {
-      const lastPos = positions.pop()!;
-      positions.unshift(lastPos);
-
-      cardRefs.value.forEach((card, i) => {
-        if (card && positions[i]) {
-          gsap.to(card, {
-            x: positions[i].x,
-            y: positions[i].y,
-            scale: positions[i].scale,
-            zIndex: positions[i].zIndex,
-            duration: 0.8,
-            ease: "power2.inOut",
-          });
-        }
-      });
-    }, 4000);
-
-    const leftInterval = setInterval(() => updateCardSrc(leftCardSrc), 6000);
-    const centerInterval = setInterval(() => updateCardSrc(centerCardSrc), 5500);
-    const rightInterval = setInterval(() => updateCardSrc(rightCardSrc), 6500);
-
-    const handleResize = () => {
-      const newPositions = getPositions();
-      Object.assign(positions, newPositions);
-      cardRefs.value.forEach((card, i) => {
-        if (card && positions[i]) {
-          gsap.to(card, {
-            x: positions[i].x,
-            y: positions[i].y,
-            scale: positions[i].scale,
-            zIndex: positions[i].zIndex,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        }
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    onUnmounted(() => {
-      clearInterval(carouselIntervalId);
-      clearInterval(leftInterval);
-      clearInterval(centerInterval);
-      clearInterval(rightInterval);
-      window.removeEventListener("resize", handleResize);
-    });
-  });
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 500ms ease-in-out;
-  position: absolute;
-  inset: 0;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
-}
-</style>

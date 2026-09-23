@@ -1,3 +1,4 @@
+import { teamOrderSql } from '../scoring/teamOrder.js'
 import type { ResultSetHeader, RowDataPacket } from 'mysql2'
 import { getPool } from '../db/pool.js'
 import type { TeamRecord } from '../types/index.js'
@@ -19,7 +20,7 @@ function rowToTeam(row: TeamRow): TeamRecord {
 }
 
 export async function listTeams(): Promise<TeamRecord[]> {
-  const [rows] = await getPool().query<TeamRow[]>('SELECT * FROM teams ORDER BY team ASC')
+  const [rows] = await getPool().query<TeamRow[]>(`SELECT * FROM teams ORDER BY ${teamOrderSql('team')}`)
   return rows.map(rowToTeam)
 }
 

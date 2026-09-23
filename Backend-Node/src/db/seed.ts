@@ -28,18 +28,18 @@ function arg(name: string): string | undefined {
 type SampleContestant = { name: string; team: string }
 
 /**
- * The five Cultural Night teams. These are the subjects that Interpretative and
+ * The five Cultural Night teams. These are the subjects that Cultural and
  * Modern Dance are scored against, and the affiliations a contestant belongs to.
  */
-export const CULTURAL_TEAMS = ['Red Avengers', 'Yellow Predators', 'Green Warriors', 'Purple Gladiators', 'Blue Raptors'] as const
+export const CULTURAL_TEAMS = ['Black Stallion', 'White Wolves', 'Purple Hawk', 'Green Dragon', 'Red Vipers'] as const
 
 // Placeholder Vocal Solo roster - replace with the real contestants before the event.
 const SAMPLE_CONTESTANTS: (SampleContestant & { gender: Gender })[] = [
-  { name: 'Dela Cruz, Juan', team: 'Red Avengers', gender: 'male' },
-  { name: 'Santos, Maria', team: 'Yellow Predators', gender: 'female' },
-  { name: 'Reyes, Jose', team: 'Green Warriors', gender: 'male' },
-  { name: 'Bautista, Ana', team: 'Purple Gladiators', gender: 'female' },
-  { name: 'Garcia, Pedro', team: 'Blue Raptors', gender: 'male' },
+  { name: 'Dela Cruz, Juan', team: 'Black Stallion', gender: 'male' },
+  { name: 'Santos, Maria', team: 'White Wolves', gender: 'female' },
+  { name: 'Reyes, Jose', team: 'Purple Hawk', gender: 'male' },
+  { name: 'Bautista, Ana', team: 'Green Dragon', gender: 'female' },
+  { name: 'Garcia, Pedro', team: 'Red Vipers', gender: 'male' },
 ]
 
 async function seedTeams(): Promise<number> {

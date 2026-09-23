@@ -2,10 +2,10 @@
   <form class="grid grid-cols-2 gap-2 md:gap-5" @submit.prevent="handleSubmit">
     <div class="col-span-2">
       <label for="teamName" class="block text-sm font-medium text-gray-700">Team Name</label>
-      <input v-model="teamName" id="teamName" type="text" placeholder="e.g. Red Avengers"
+      <input v-model="teamName" id="teamName" type="text" placeholder="e.g. Black Stallion"
         :class="FORM_FIELDS.INPUT_FIELD" />
       <p class="mt-1 text-xs text-gray-500">
-        Starting the name with a colour (red, yellow, green, purple, blue) gives the team a matching badge.
+        Starting the name with a colour (black, white, purple, green, red) gives the team a matching badge.
       </p>
     </div>
 

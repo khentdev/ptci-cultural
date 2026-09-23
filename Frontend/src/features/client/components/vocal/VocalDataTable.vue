@@ -42,8 +42,9 @@
 </template>
 
 <script lang="ts" setup>
+    import { useScoreDrafts } from '../../composables/useScoreDrafts';
+    import type { ScoreDraftKey } from '../../composables/useScoreDrafts';
     import { computed, watchEffect } from 'vue';
-    import { useLocalStorage } from '@vueuse/core';
     import FeatureBaseTable from '../../../shared/components/reusables/FeatureBaseTable.vue';
     import IsEmptyState from '../../../shared/components/reusables/IsEmptyState.vue';
     import FeatureServerState from '../../../shared/components/reusables/FeatureServerState.vue';
@@ -54,7 +55,7 @@
     import { useScoreInput } from '../../composables/useScoreInput';
 
     const props = defineProps<{
-        inputKey: string;
+        inputKey: ScoreDraftKey;
         retryFn: () => any;
         isLoading?: boolean;
         isError?: boolean;
@@ -81,7 +82,7 @@
         >
     );
 
-    const scoreRows = useLocalStorage<ScoreRow[]>(props.inputKey, []);
+    const scoreRows = useScoreDrafts<ScoreRow>(props.inputKey);
 
     /** score rows this judge has already committed, keyed by subject id */
     const submittedById = computed(() => {

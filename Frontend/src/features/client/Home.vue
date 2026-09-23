@@ -25,7 +25,7 @@
             You may now begin evaluating candidates across all cultural performance categories -
             including <span class="font-semibold text-text-primary">Vocals</span>,
             <span class="font-semibold text-text-primary">Modern Dance</span>, and
-            <span class="font-semibold text-text-primary">Interpretative Dance</span>.
+            <span class="font-semibold text-text-primary">Cultural Dance</span>.
             All judging routes are now open and ready for your evaluation.
           </p>
 

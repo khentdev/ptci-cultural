@@ -28,7 +28,7 @@ const { createUser } = await import('../src/repositories/userRepository.js')
 const { hashPassword } = await import('../src/services/authService.js')
 const { CATEGORIES, CATEGORY_KEYS } = await import('../src/scoring/categories.js')
 type CategoryKey = (typeof CATEGORY_KEYS)[number]
-const TEAM_NAMES = ['Red Avengers', 'Yellow Predators', 'Green Warriors', 'Purple Gladiators', 'Blue Raptors']
+const TEAM_NAMES = ['Black Stallion', 'White Wolves', 'Purple Hawk', 'Green Dragon', 'Red Vipers']
 
 // ---- fresh database ----
 {
@@ -181,12 +181,14 @@ section('teams')
   check('duplicate team name -> 422', () => assert.equal(dup.status, 422))
 
   const list = await call('GET', '/api/teams', { cookie: j1 })
-  check('team list -> 5 rows, string ids, alphabetical', () => {
+  check('team list -> 5 rows, string ids, fixed colour running order', () => {
     assert.equal(list.status, 200)
     assert.equal(list.body.data.length, 5)
     assert.equal(typeof list.body.data[0].team_id, 'string')
+    // Not alphabetical: teams run in the order they are scored in, ranked by the
+    // colour their name starts with (see src/scoring/teamOrder.ts).
     const names = list.body.data.map((t: Json) => t.team)
-    assert.deepEqual(names, [...names].sort())
+    assert.deepEqual(names, ['White Wolves', 'Green Dragon', 'Black Stallion', 'Purple Hawk', 'Red Vipers'])
   })
 }
 
@@ -274,10 +276,10 @@ const scaledBody = (key: CategoryKey, subjectId: string, factor: number): Json =
 
 {
   check('three categories, two subject kinds', () => {
-    assert.deepEqual([...CATEGORY_KEYS].sort(), ['interpretative', 'modern', 'vocal'])
+    assert.deepEqual([...CATEGORY_KEYS].sort(), ['cultural', 'modern', 'vocal'])
     assert.equal(CATEGORIES.vocal.subject.kind, 'contestant')
     assert.equal(CATEGORIES.modern.subject.kind, 'team')
-    assert.equal(CATEGORIES.interpretative.subject.kind, 'team')
+    assert.equal(CATEGORIES.cultural.subject.kind, 'team')
   })
 
   const firstVocal = subjectIdsFor('vocal')[0]!
@@ -395,7 +397,7 @@ section('scoreboards')
   const cats = await call('GET', '/api/scores/categories', { cookie: j1 })
   check('categories config -> three categories, each summing to 100', () => {
     assert.equal(cats.body.data.length, 3)
-    assert.deepEqual(cats.body.data.map((c: Json) => c.key).sort(), ['interpretative', 'modern', 'vocal'])
+    assert.deepEqual(cats.body.data.map((c: Json) => c.key).sort(), ['cultural', 'modern', 'vocal'])
     for (const c of cats.body.data) assert.equal(c.criteria.reduce((a: number, x: Json) => a + x.max, 0), 100, c.key)
   })
 }
@@ -546,7 +548,7 @@ section('batch score submissions & own scores')
     assert.equal(modernBatch.body.has_submitted, false)
   })
 
-  const interpBatch = await call('POST', '/api/scores/interpretative/batch', { cookie: j4, body: subjectIdsFor('interpretative').map((id) => maxBody('interpretative', id)) })
+  const interpBatch = await call('POST', '/api/scores/cultural/batch', { cookie: j4, body: subjectIdsFor('cultural').map((id) => maxBody('cultural', id)) })
   check('third and final category -> has_submitted flips true', () => {
     assert.equal(interpBatch.status, 200)
     assert.equal(interpBatch.body.has_submitted, true)

@@ -1,5 +1,6 @@
 import './features/shared/styles/style.css';
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import { queryClient } from './core/API/queryClient';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
@@ -11,7 +12,7 @@ import { useAxiosInterceptor } from './core/API/axiosInterceptor';
 const pinia = createPinia()
 const app = createApp(App)
 useAxiosInterceptor()
-app.use(VueQueryPlugin)
+app.use(VueQueryPlugin, { queryClient })
 
 app.use(pinia)
 app.use(router)

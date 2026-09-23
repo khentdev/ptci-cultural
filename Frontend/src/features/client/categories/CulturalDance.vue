@@ -1,30 +1,31 @@
 <template>
-    <feature-base-component :is-loading="getInterpretativeTeams.isPending">
+    <feature-base-component :is-loading="getCulturalTeams.isPending">
         <feature-offline-state v-if="fetchError.offline || offline" />
-        <data-loading-state v-else-if="getInterpretativeTeams.isPending || getMyInterpretativeScores.isPending" />
+        <data-loading-state v-else-if="getCulturalTeams.isPending || getMyCulturalScores.isPending" />
         <template v-else>
             <div class="relative">
-                <inline-fetch-indicator v-show="getInterpretativeTeams.isFetching" />
-                <feature-header :popup-fn="openSevenRules" :has-icon="true" title="Teams' Interpretative Dance Scores"
-                    action-fn-name="Submit" action-fn-title="Submit interpretative dance scores for teams"
+                <inline-fetch-indicator v-show="getCulturalTeams.isFetching" />
+                <feature-header :popup-fn="openSevenRules" :has-icon="true" title="Teams' Cultural Dance Scores"
+                    action-fn-name="Submit" action-fn-title="Submit cultural dance scores for teams"
                     popup-fn-name="View Judging Rules" popup-fn-title="View judging rules"
                     :action-fn="openConfirmationModal" :should-show-action-button="!hasSubmittedAll"
-                    description="Provide interpretative dance performance scores for each team." />
+                    description="Provide cultural dance performance scores for each team." />
 
-                <InterpretativeDataTable :retry-fn="refetchInterpretativeFeat" ref="scoreDataTable" input-key="interpretative-scores"
-                    :is-loading="getInterpretativeTeams.isFetching" :is-error="fetchError.serverError" />
+                <CulturalDanceDataTable :retry-fn="refetchCulturalFeat" ref="scoreDataTable" :input-key="SCORE_DRAFT_KEYS.cultural"
+                    :is-loading="getCulturalTeams.isFetching" :is-error="fetchError.serverError" />
             </div>
         </template>
     </feature-base-component>
 
     <top-seven-rules :is-dark-bg="true" :is-open="isSevenRulesOpen" :close="() => (isSevenRulesOpen = false)" />
     <popup-modal :show="isModalPopupShown" @close="() => (isModalPopupShown = false)" />
-    <confirmation-modal title="Submit Interpretative Dance Scores for Teams" :is-loading="createInterpretativeScoreMutation.isPending"
+    <confirmation-modal title="Submit Cultural Dance Scores for Teams" :is-loading="createCulturalScoreMutation.isPending"
         description="Once submitted, these scores will be locked and cannot be modified. Please review all entries carefully before confirming."
-        :show="isConfirmationShown" :action-fn="handleCreateInterpretativeScore" :close="() => isConfirmationShown = false" />
+        :show="isConfirmationShown" :action-fn="handleCreateCulturalScore" :close="() => isConfirmationShown = false" />
 </template>
 
 <script lang="ts" setup>
+    import { SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
     import { computed, onMounted, ref } from 'vue';
     import FeatureBaseComponent from '../components/reusables/FeatureBaseComponent.vue';
     import FeatureOfflineState from '../../shared/components/reusables/FeatureOfflineState.vue';
@@ -35,35 +36,35 @@
     import PopupModal from '../components/reusables/PopupModal.vue';
     import FeatureHeader from '../../shared/components/reusables/FeatureHeader.vue';
     import { useNetworkCheck } from '../../../shared/composables/useNetworkStatus';
-    import { useInterpretativeStore } from '../store/useInterpretativeStore';
-    import InterpretativeDataTable from '../components/interpretative/InterpretativeDataTable.vue';
+    import { useCulturalStore } from '../store/useCulturalStore';
+    import CulturalDanceDataTable from '../components/cultural/CulturalDanceDataTable.vue';
 
     const { isOnline } = useNetworkCheck()
     const {
-        getInterpretativeTeams,
-        getMyInterpretativeScores,
-        refetchInterpretativeFeat,
-        createInterpretativeScore,
-        createInterpretativeScoreMutation,
-        enableInterpretative,
+        getCulturalTeams,
+        getMyCulturalScores,
+        refetchCulturalFeat,
+        createCulturalScore,
+        createCulturalScoreMutation,
+        enableCultural,
         fetchError,
-    } = useInterpretativeStore()
+    } = useCulturalStore()
 
     const offline = computed(() => !isOnline.value)
 
-    onMounted(() => enableInterpretative())
+    onMounted(() => enableCultural())
 
     /** Every subject already scored by this judge -> nothing left to submit. */
     const hasSubmittedAll = computed(() => {
-        const subjects = getInterpretativeTeams.data ?? []
-        const scored = getMyInterpretativeScores.data ?? []
+        const subjects = getCulturalTeams.data ?? []
+        const scored = getMyCulturalScores.data ?? []
         return subjects.length > 0 && scored.length >= subjects.length
     })
 
     const isSevenRulesOpen = ref(false);
     const openSevenRules = () => (isSevenRulesOpen.value = true);
 
-    const scoreDataTable = ref<InstanceType<typeof InterpretativeDataTable> | null>(null);
+    const scoreDataTable = ref<InstanceType<typeof CulturalDanceDataTable> | null>(null);
 
     const isModalPopupShown = ref(false);
     const isConfirmationShown = ref(false);
@@ -79,7 +80,7 @@
         isConfirmationShown.value = true;
     };
 
-    const handleCreateInterpretativeScore = async () => {
+    const handleCreateCulturalScore = async () => {
         const rows = scoreDataTable.value?.scoreRows;
         const isRowLocked = scoreDataTable.value?.isRowLocked;
         if (!rows || !rows.length) return;
@@ -98,7 +99,7 @@
 
         if (!payload.length) return;
 
-        await createInterpretativeScore(payload);
+        await createCulturalScore(payload);
         isConfirmationShown.value = false;
     }
 </script>

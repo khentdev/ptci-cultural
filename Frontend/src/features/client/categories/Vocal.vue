@@ -11,7 +11,7 @@
                     :action-fn="openConfirmationModal" :should-show-action-button="!hasSubmittedAll"
                     description="Provide vocal performance scores for each vocal contestant." />
 
-                <VocalDataTable :retry-fn="refetchVocalFeat" ref="scoreDataTable" input-key="vocal-scores"
+                <VocalDataTable :retry-fn="refetchVocalFeat" ref="scoreDataTable" :input-key="SCORE_DRAFT_KEYS.vocal"
                     :is-loading="getVocalCandidates.isFetching" :is-error="fetchError.serverError" />
             </div>
         </template>
@@ -25,6 +25,7 @@
 </template>
 
 <script lang="ts" setup>
+    import { SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
     import { computed, onMounted, ref } from 'vue';
     import FeatureBaseComponent from '../components/reusables/FeatureBaseComponent.vue';
     import FeatureOfflineState from '../../shared/components/reusables/FeatureOfflineState.vue';

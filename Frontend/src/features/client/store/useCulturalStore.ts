@@ -1,28 +1,28 @@
+import { useScoreDrafts, SCORE_DRAFT_KEYS } from "../composables/useScoreDrafts";
 import { defineStore } from "pinia";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { reactive, readonly, ref, toRaw, watchEffect } from "vue";
-import { useLocalStorage } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
-import { interpretativeService } from "../services/interpretativeService";
+import { culturalService } from "../services/culturalService";
 import { appErrorHandler } from "../../errors/appErrorHandler";
 import { useToast } from "../../shared/composables/useToast";
 import { useAuthStore } from "../../auth/store/authStore";
-import type { CreateInterpretativeScoreParams, InterpretativeScoreErrorResponse } from "../types/interpretative/types";
+import type { CreateCulturalScoreParams, CulturalScoreErrorResponse } from "../types/cultural/types";
 
 const INFRA_ERRORS = ["offline", "unreachable", "serverError", "requestTimeout"];
 
-export const useInterpretativeStore = defineStore("interpretativeScore", () => {
+export const useCulturalStore = defineStore("culturalScore", () => {
     const { toast } = useToast();
     const authStore = useAuthStore();
 
-    const scoreInputs = useLocalStorage<Record<string, unknown>[]>("interpretative-scores", []);
+    const scoreInputs = useScoreDrafts<Record<string, unknown>>(SCORE_DRAFT_KEYS.cultural);
 
     const enabled = ref(false);
 
-    const getInterpretativeTeams = useQuery({
-        queryKey: ["interpretativeSubjects"],
-        queryFn: () => interpretativeService.getTeams(),
+    const getCulturalTeams = useQuery({
+        queryKey: ["culturalSubjects"],
+        queryFn: () => culturalService.getTeams(),
         staleTime: 15 * 60 * 1000,
         gcTime: 60 * 60 * 1000,
         retry: 3,
@@ -35,9 +35,9 @@ export const useInterpretativeStore = defineStore("interpretativeScore", () => {
      * The server is the source of truth for "already submitted" - a page refresh,
      * a cleared browser store or a different device all still lock the inputs.
      */
-    const getMyInterpretativeScores = useQuery({
-        queryKey: ["myInterpretativeScores"],
-        queryFn: () => interpretativeService.getMyInterpretativeScores(),
+    const getMyCulturalScores = useQuery({
+        queryKey: ["myCulturalScores"],
+        queryFn: () => culturalService.getMyCulturalScores(),
         staleTime: 15 * 60 * 1000,
         gcTime: 60 * 60 * 1000,
         retry: 3,
@@ -46,73 +46,73 @@ export const useInterpretativeStore = defineStore("interpretativeScore", () => {
         enabled,
     });
 
-    const refetchInterpretativeFeat = () => {
-        getInterpretativeTeams.refetch();
-        getMyInterpretativeScores.refetch();
+    const refetchCulturalFeat = () => {
+        getCulturalTeams.refetch();
+        getMyCulturalScores.refetch();
     };
 
-    const createInterpretativeScoreMutation = useMutation({
-        mutationFn: (scores: CreateInterpretativeScoreParams[]) => interpretativeService.createInterpretativeScoreBatch(scores),
+    const createCulturalScoreMutation = useMutation({
+        mutationFn: (scores: CreateCulturalScoreParams[]) => culturalService.createCulturalScoreBatch(scores),
         onMutate: () => ({ backupScores: structuredClone(toRaw(scoreInputs.value)) }),
         onSuccess: (res) => {
             if (typeof res.has_submitted === "boolean") {
                 authStore.setUserMetaDataAfterScoreSubmit(res.has_submitted);
             }
-            getMyInterpretativeScores.refetch().catch(() => {});
+            getMyCulturalScores.refetch().catch(() => {});
             toast.success("All scores submitted successfully!");
         },
-        onError: (err: AxiosError<InterpretativeScoreErrorResponse>, _vars, context) => {
+        onError: (err: AxiosError<CulturalScoreErrorResponse>, _vars, context) => {
             const parsed = appErrorHandler(err);
             if (INFRA_ERRORS.includes(parsed.type)) toast.error(parsed.message);
             if (parsed.err.status === 422 || parsed.err.status === 409) {
                 toast.error("You have already submitted your scores for this category.");
-                getMyInterpretativeScores.refetch().catch(() => {});
+                getMyCulturalScores.refetch().catch(() => {});
                 return;
             }
             if (context?.backupScores) {
                 scoreInputs.value = structuredClone(context.backupScores);
-                toast.info("Interpretative dance scores have been restored. Please try again.");
+                toast.info("Cultural dance scores have been restored. Please try again.");
             }
         },
     });
 
-    const createInterpretativeScore = (data: CreateInterpretativeScoreParams[]) =>
-        createInterpretativeScoreMutation.mutateAsync(data);
+    const createCulturalScore = (data: CreateCulturalScoreParams[]) =>
+        createCulturalScoreMutation.mutateAsync(data);
 
     /** Ids this judge has already scored, as strings, for per-row disabling. */
-    const scoredInterpretativeIds = () =>
-        new Set((getMyInterpretativeScores.data.value ?? []).map((s) => String(s.team_id)));
+    const scoredCulturalIds = () =>
+        new Set((getMyCulturalScores.data.value ?? []).map((s) => String(s.team_id)));
 
     const fetchError = reactive({ serverError: false, offline: false });
 
     watchEffect(() => {
-        const subjectsFailed = getInterpretativeTeams.isError.value;
-        const myScoresFailed = getMyInterpretativeScores.isError.value;
+        const subjectsFailed = getCulturalTeams.isError.value;
+        const myScoresFailed = getMyCulturalScores.isError.value;
 
         if (subjectsFailed || myScoresFailed) {
             const error = (subjectsFailed
-                ? getInterpretativeTeams.error.value
-                : getMyInterpretativeScores.error.value) as AxiosError<InterpretativeScoreErrorResponse>;
+                ? getCulturalTeams.error.value
+                : getMyCulturalScores.error.value) as AxiosError<CulturalScoreErrorResponse>;
             if (error) {
                 const { type } = appErrorHandler(error);
                 fetchError.offline = type === "offline";
                 fetchError.serverError =
                     type === "serverError" || type === "unreachable" || type === "requestTimeout";
             }
-        } else if (getInterpretativeTeams.isSuccess.value && getMyInterpretativeScores.isSuccess.value) {
+        } else if (getCulturalTeams.isSuccess.value && getMyCulturalScores.isSuccess.value) {
             fetchError.offline = false;
             fetchError.serverError = false;
         }
     });
 
     return {
-        getInterpretativeTeams,
-        getMyInterpretativeScores,
-        scoredInterpretativeIds,
-        refetchInterpretativeFeat,
-        createInterpretativeScore,
-        createInterpretativeScoreMutation,
+        getCulturalTeams,
+        getMyCulturalScores,
+        scoredCulturalIds,
+        refetchCulturalFeat,
+        createCulturalScore,
+        createCulturalScoreMutation,
         fetchError: readonly(fetchError),
-        enableInterpretative: () => (enabled.value = true),
+        enableCultural: () => (enabled.value = true),
     };
 });

@@ -143,14 +143,14 @@ VITE_MOCK_API=false
    …or insert the row in phpMyAdmin with a bcrypt hash you generate locally:
    `node -e "require('bcryptjs').hash('StrongPassw0rd',12).then(console.log)"`
 
-7. **Seed the five teams.** Interpretative and Modern Dance are scored *against a
+7. **Seed the five teams.** Cultural and Modern Dance are scored *against a
    team*, so neither category works until `teams` has rows — and the contestant form
    reads the same list. `npm run seed` does it, or paste into phpMyAdmin:
 
    ```sql
    INSERT INTO teams (team) VALUES
-     ('Red Avengers'), ('Yellow Predators'), ('Green Warriors'),
-     ('Purple Gladiators'), ('Blue Raptors');
+     ('Black Stallion'), ('White Wolves'), ('Purple Hawk'),
+     ('Green Dragon'), ('Red Vipers');
    ```
 
    Contestants (number, name, team, gender) are then added from the admin UI.

@@ -16,7 +16,7 @@ export type GetModernTeamDTO = {
 
 export type ModernTeam = {
     team_id: string,
-    /** Display name as stored, e.g. "Red Avengers". */
+    /** Display name as stored, e.g. "Black Stallion". */
     team: string,
     created_at: string
 }

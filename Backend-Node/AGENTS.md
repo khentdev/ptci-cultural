@@ -2,7 +2,7 @@
 
 **Purpose:** Backend for the PTCI Cultural Night tabulation system. Judges score three categories from the Vue frontend; admins manage teams/contestants/accounts and read scoreboards.
 
-**Domain:** Vocal Solo is scored per **contestant**; Interpretative Dance and Modern Dance are scored per **team**. Each category's `subject` in `scoring/categories.ts` decides which, and every subject-dependent query derives from it. A contestant belongs to a team (`contestants.team_id`). `cand_gender` is stored and displayed but is **never** a judging axis — all contestants are judged in one list.
+**Domain:** Vocal Solo is scored per **contestant**; Cultural Dance and Modern Dance are scored per **team**. Each category's `subject` in `scoring/categories.ts` decides which, and every subject-dependent query derives from it. A contestant belongs to a team (`contestants.team_id`). `cand_gender` is stored and displayed but is **never** a judging axis — all contestants are judged in one list.
 
 **Frontend:** `../Frontend` (Vue 3 + Pinia + TanStack Query). It talks to this API only, with `axios { withCredentials: true }` and `VITE_API_URL=<origin>/api`. Its DTOs (`src/features/**/types`) are the contract — ids and decimals are strings there.
 
@@ -24,7 +24,7 @@
 auth: `POST login` · `POST check-session` · `GET me` · `POST logout` · `PUT has-submitted`
 teams: `GET /` · `POST /` · `PUT /:id` · `DELETE /:id`
 contestants: `GET /` · `POST /` · `PUT /:id` · `DELETE /:id`
-scores: `POST /:category` · `POST /:category/batch` · `GET /:category/mine` · `GET /:category/judges` · `GET /:category/final` · `GET /categories` (categories: `vocal`, `interpretative`, `modern`)
+scores: `POST /:category` · `POST /:category/batch` · `GET /:category/mine` · `GET /:category/judges` · `GET /:category/final` · `GET /categories` (categories: `vocal`, `cultural`, `modern`)
 users (admin): `GET /` · `POST /` · `PUT /:id/password` · `PUT /:id/reset-submission` · `PUT /:id/active` · `DELETE /:id`
 activity-logs (admin): `GET /`
 `GET /health` (no prefix)

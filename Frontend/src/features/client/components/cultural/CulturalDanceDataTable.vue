@@ -1,7 +1,7 @@
 <template>
     <feature-base-table>
         <template #table>
-            <feature-server-state v-if="isError" :on-retry="retryFn" title="Couldn't load interpretative dance teams"
+            <feature-server-state v-if="isError" :on-retry="retryFn" title="Couldn't load cultural dance teams"
                 message="There was an issue retrieving the data. Please check your connection and try again." />
             <is-empty-state v-else-if="!scoreRows.length" />
             <table v-else :class="TABLE_STYLES.TB">
@@ -37,24 +37,25 @@
 </template>
 
 <script lang="ts" setup>
+    import { useScoreDrafts } from '../../composables/useScoreDrafts';
+    import type { ScoreDraftKey } from '../../composables/useScoreDrafts';
     import { computed, watchEffect } from 'vue';
-    import { useLocalStorage } from '@vueuse/core';
     import FeatureBaseTable from '../../../shared/components/reusables/FeatureBaseTable.vue';
     import IsEmptyState from '../../../shared/components/reusables/IsEmptyState.vue';
     import FeatureServerState from '../../../shared/components/reusables/FeatureServerState.vue';
     import { TABLE_STYLES } from '../../../shared/constants/tableStyles';
-    import { useInterpretativeStore } from '../../store/useInterpretativeStore';
+    import { useCulturalStore } from '../../store/useCulturalStore';
     import { getFormattedTeamLabel, getTeamBadgeClasses } from '../../types/shared/types';
     import { useScoreInput } from '../../composables/useScoreInput';
 
     const props = defineProps<{
-        inputKey: string;
+        inputKey: ScoreDraftKey;
         retryFn: () => any;
         isLoading?: boolean;
         isError?: boolean;
     }>();
 
-    const { getInterpretativeTeams, getMyInterpretativeScores } = useInterpretativeStore()
+    const { getCulturalTeams, getMyCulturalScores } = useCulturalStore()
 
     const CRITERIA = [
     { key: "originality", label: "Originality", max: 25 },
@@ -74,12 +75,12 @@
         >
     );
 
-    const scoreRows = useLocalStorage<ScoreRow[]>(props.inputKey, []);
+    const scoreRows = useScoreDrafts<ScoreRow>(props.inputKey);
 
     /** score rows this judge has already committed, keyed by subject id */
     const submittedById = computed(() => {
         const map = new Map<string, Record<string, string>>();
-        for (const score of getMyInterpretativeScores.data ?? []) {
+        for (const score of getMyCulturalScores.data ?? []) {
             map.set(String(score.team_id), score as unknown as Record<string, string>);
         }
         return map;
@@ -98,7 +99,7 @@
      * a locally cached draft, then a fresh blank row.
      */
     watchEffect(() => {
-        const subjects = getInterpretativeTeams.data ?? [];
+        const subjects = getCulturalTeams.data ?? [];
         if (!subjects.length) return;
 
         const cached = scoreRows.value;
