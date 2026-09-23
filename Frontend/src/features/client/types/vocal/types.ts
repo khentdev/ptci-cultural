@@ -17,6 +17,8 @@ export type GetVocalCandidatesDTO = {
 
 export type VocalCandidates = {
     cand_id: string,
+    /** Running-order number shown to judges; the API sorts the list by it. */
+    cand_number: string,
     cand_name: string,
     /** Team display name, joined server-side. */
     cand_team: string,

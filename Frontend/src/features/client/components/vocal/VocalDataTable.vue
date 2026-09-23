@@ -7,6 +7,7 @@
             <table v-else :class="TABLE_STYLES.TB">
                 <thead>
                     <tr>
+                        <th :class="TABLE_STYLES.TH">#</th>
                         <th :class="TABLE_STYLES.TH">Full Name</th>
                         <th :class="TABLE_STYLES.TH">Team</th>
                         <th v-for="criterion in CRITERIA" :key="criterion.key" :class="TABLE_STYLES.TH">
@@ -16,6 +17,7 @@
                 </thead>
                 <tbody :class="TABLE_STYLES.TBODY">
                     <tr v-for="row in scoreRows" :key="row.subjectId" class="hover:bg-gray-50 transition-colors">
+                        <td :class="TABLE_STYLES.TD.bold">{{ row.candNumber }}</td>
                         <td
                             class="px-6 py-3 text-xs md:text-sm text-gray-800 font-medium border-gray-200 break-words min-w-35 max-w-35">
                             {{ FormatFullName(row.name ?? "") }}
@@ -73,7 +75,7 @@
     ] as const;
 
     type CriterionKey = (typeof CRITERIA)[number]["key"];
-    type ScoreRow = { subjectId: string; name: string | null; team: string } & Record<CriterionKey, string>;
+    type ScoreRow = { subjectId: string; candNumber: string; name: string | null; team: string } & Record<CriterionKey, string>;
 
     const { clampValues, hasMissingFields } = useScoreInput(
         Object.fromEntries(CRITERIA.map((criterion) => [criterion.key, { max: criterion.max }])) as Record<
@@ -115,6 +117,7 @@
         scoreRows.value = subjects.map((s) => {
             const base = {
                     subjectId: String(s.cand_id),
+                    candNumber: String(s.cand_number),
                     name: s.cand_name,
                     team: s.cand_team,
             };
