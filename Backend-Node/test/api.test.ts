@@ -188,7 +188,7 @@ section('teams')
     // Not alphabetical: teams run in the order they are scored in, ranked by the
     // colour their name starts with (see src/scoring/teamOrder.ts).
     const names = list.body.data.map((t: Json) => t.team)
-    assert.deepEqual(names, ['White Wolves', 'Green Dragon', 'Black Stallion', 'Purple Hawk', 'Red Vipers'])
+    assert.deepEqual(names, ['Red Vipers', 'Green Dragon', 'Black Stallion', 'White Wolves', 'Purple Hawk'])
   })
 }
 

@@ -3,7 +3,7 @@
  * team's name starts with - the same first-word convention the frontend uses to
  * pick a team's badge colour. A team must therefore be named "<Colour> <Something>".
  */
-export const TEAM_COLOUR_ORDER = ['white', 'green', 'black', 'purple', 'red'] as const
+export const TEAM_COLOUR_ORDER = ['red', 'green', 'black', 'white', 'purple'] as const
 
 /**
  * ORDER BY fragment ranking teams by that colour. MySQL's FIELD() returns 0 when
