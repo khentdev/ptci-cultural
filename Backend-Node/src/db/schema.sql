@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS scores_vocal (
       REFERENCES contestants (cand_id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS scores_interpretative (
+CREATE TABLE IF NOT EXISTS scores_cultural (
     score_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     judge_id INT UNSIGNED NOT NULL,
     team_id INT UNSIGNED NOT NULL,
@@ -73,8 +73,8 @@ CREATE TABLE IF NOT EXISTS scores_interpretative (
     PRIMARY KEY (score_id),
     UNIQUE KEY uq_judge_subject (judge_id, team_id),
     KEY idx_subject (team_id),
-    CONSTRAINT fk_interpretative_judge FOREIGN KEY (judge_id) REFERENCES users (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_interpretative_subject FOREIGN KEY (team_id)
+    CONSTRAINT fk_cultural_judge FOREIGN KEY (judge_id) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_cultural_subject FOREIGN KEY (team_id)
       REFERENCES teams (team_id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

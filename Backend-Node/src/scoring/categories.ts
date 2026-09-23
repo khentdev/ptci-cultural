@@ -6,7 +6,7 @@
  *
  * SQL identifiers elsewhere are interpolated ONLY from this file.
  */
-export const CATEGORY_KEYS = ['vocal', 'interpretative', 'modern'] as const
+export const CATEGORY_KEYS = ['vocal', 'cultural', 'modern'] as const
 
 export type CategoryKey = (typeof CATEGORY_KEYS)[number]
 
@@ -78,10 +78,10 @@ export const CATEGORIES: Record<CategoryKey, CategoryConfig> = {
     ],
     submitRoles: ['judge'],
   },
-  interpretative: {
-    key: 'interpretative',
-    table: 'scores_interpretative',
-    label: 'Interpretative Dance',
+  cultural: {
+    key: 'cultural',
+    table: 'scores_cultural',
+    label: 'Cultural Dance',
     subject: TEAM_SUBJECT,
     criteria: [
       c('originality', 25),
