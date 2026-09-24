@@ -1,6 +1,14 @@
 <template>
   <FeatureBaseLayout :navigation-btns="navigationBtns" :role="authStore.capitalizedRole"
-    :user-name="authStore.capitalizedUsername"><template #router-view><router-view></router-view></template>
+    :user-name="authStore.capitalizedUsername">
+    <template #router-view>
+      <!-- Keyed by route name: every scoreboard category reuses the same view
+           component, so without a key Vue patches it in place and setup() keeps
+           the previous category's store (e.g. Cultural showing Modern's data). -->
+      <router-view v-slot="{ Component, route: viewRoute }">
+        <component :is="Component" :key="viewRoute.name"></component>
+      </router-view>
+    </template>
   </FeatureBaseLayout>
 </template>
 
